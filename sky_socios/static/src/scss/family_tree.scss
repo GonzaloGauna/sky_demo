@@ -1,0 +1,88 @@
+.o_sky_family_tree {
+    padding: 1rem;
+    background: linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%);
+}
+
+.o_sky_family_tree_title {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+}
+
+.o_sky_family_tree_top,
+.o_sky_family_tree_children {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.o_sky_family_tree_children {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 2px dashed rgba(15, 23, 42, 0.15);
+}
+
+.o_sky_family_tree_node {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-width: 240px;
+    padding: 0.85rem 1rem;
+    border-radius: 1rem;
+    background: #fff;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+    cursor: pointer;
+}
+
+.o_sky_family_tree_node img {
+    width: 56px;
+    height: 56px;
+    border-radius: 999px;
+    object-fit: cover;
+    background: #e2e8f0;
+}
+
+.o_sky_family_tree_node_body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+}
+
+.o_sky_family_tree_chip {
+    display: inline-flex;
+    color: #fff;
+    border-radius: 999px;
+    padding: 0.15rem 0.55rem;
+    font-size: 0.75rem;
+    width: fit-content;
+}
+
+.o_sky_family_tree_warning {
+    margin-bottom: 1rem;
+}
+
+.o_sky_family_card {
+    padding: 0.75rem;
+}
+
+.o_sky_family_preview {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.o_sky_family_preview_member {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.o_sky_family_preview_member img {
+    width: 42px;
+    height: 42px;
+    border-radius: 999px;
+    object-fit: cover;
+}

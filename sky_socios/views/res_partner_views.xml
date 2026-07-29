@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_partner_form_inherit_sky_socios" model="ir.ui.view">
+        <field name="name">res.partner.form.sky.socios</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form/sheet" position="before">
+                <header>
+                <button name="action_open_recategorizar_hijo_wizard" type="object" string="Pasar hijo/a a Activo" class="btn-primary" invisible="tipo_registro != 'socio' or grupo_familiar != 'hijo'"/>
+                <button name="action_open_recategorizar_vitalicio_wizard" type="object" string="Pasar a Vitalicio" class="btn-secondary" invisible="tipo_registro != 'socio' or not is_categoria_activo"/>
+                <button name="action_open_recategorizar_cadete_wizard" type="object" string="Recategorizar por edad" class="btn-secondary" invisible="tipo_registro != 'socio' or (not is_categoria_cadete and grupo_familiar != 'hijo')"/>
+                </header>
+            </xpath>
+            <xpath expr="//sheet/notebook" position="inside">
+                <page string="Socio" invisible="tipo_registro != 'socio'">
+                    <group>
+                        <field name="is_categoria_activo" invisible="1"/>
+                        <field name="is_categoria_cadete" invisible="1"/>
+                        <group string="Identificación">
+                            <field name="tipo_registro"/>
+                            <field name="apellido"/>
+                            <field name="nombre"/>
+                            <field name="genero"/>
+                            <field name="fecha_nacimiento"/>
+                            <field name="estado_civil"/>
+                            <field name="activa"/>
+                            <field name="codigo"/>
+                        </group>
+                        <group string="Institucionales">
+                            <field name="categoria_socio_id"/>
+                            <field name="grupo_familiar"/>
+                            <field name="familia_id"/>
+                            <field name="fecha_ingreso"/>
+                            <field name="fecha_pase"/>
+                            <field name="pais_residencia_id"/>
+                            <field name="edad" readonly="1"/>
+                        </group>
+                    </group>
+                    <group string="Comunicación">
+                        <field name="phone"/>
+                        <field name="phone_aux"/>
+                        <field name="email"/>
+                        <field name="email_aux"/>
+                    </group>
+                    <group string="Dirección">
+                        <field name="street"/>
+                        <field name="city"/>
+                        <field name="zip"/>
+                        <field name="state_id"/>
+                        <field name="country_id"/>
+                    </group>
+                    <group string="Otros datos">
+                        <field name="fecha_renuncia"/>
+                        <field name="fecha_cesantia"/>
+                        <field name="fecha_fallecimiento"/>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="action_res_partner_sky_socios" model="ir.actions.act_window">
+        <field name="name">Socios</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_mode">list,form,kanban</field>
+        <field name="domain">[('tipo_registro', '=', 'socio')]</field>
+        <field name="context">{'default_tipo_registro': 'socio', 'search_default_tipo_registro': 1}</field>
+    </record>
+</odoo>

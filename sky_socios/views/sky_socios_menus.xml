@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <menuitem id="menu_sky_socios_root" name="Socios" sequence="10"/>
+    <menuitem id="menu_sky_socios_socios" name="Socios" parent="menu_sky_socios_root" action="action_res_partner_sky_socios" sequence="10"/>
+    <menuitem id="menu_sky_socios_familias" name="Familias" parent="menu_sky_socios_root" action="action_sky_familia" sequence="20"/>
+    <menuitem id="menu_sky_socios_configuracion" name="Configuración" parent="menu_sky_socios_root" sequence="30"/>
+    <menuitem id="menu_sky_socios_categorias" name="Categorías" parent="menu_sky_socios_configuracion" action="action_sky_socio_categoria" sequence="10"/>
+</odoo>

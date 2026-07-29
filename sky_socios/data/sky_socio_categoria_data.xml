@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo noupdate="1">
+    <record id="sky_socio_categoria_activo" model="sky.socio.categoria">
+        <field name="name">Activo</field>
+        <field name="code">ACT</field>
+        <field name="sequence">10</field>
+        <field name="color">2</field>
+    </record>
+    <record id="sky_socio_categoria_juvenil" model="sky.socio.categoria">
+        <field name="name">Juvenil</field>
+        <field name="code">JUV</field>
+        <field name="sequence">20</field>
+        <field name="color">3</field>
+    </record>
+    <record id="sky_socio_categoria_cadete1" model="sky.socio.categoria">
+        <field name="name">Cadete1</field>
+        <field name="code">C1</field>
+        <field name="sequence">30</field>
+        <field name="color">4</field>
+    </record>
+    <record id="sky_socio_categoria_cadete2" model="sky.socio.categoria">
+        <field name="name">Cadete2</field>
+        <field name="code">C2</field>
+        <field name="sequence">40</field>
+        <field name="color">5</field>
+    </record>
+    <record id="sky_socio_categoria_cadete3" model="sky.socio.categoria">
+        <field name="name">Cadete3</field>
+        <field name="code">C3</field>
+        <field name="sequence">50</field>
+        <field name="color">6</field>
+    </record>
+    <record id="sky_socio_categoria_cadete4" model="sky.socio.categoria">
+        <field name="name">Cadete4</field>
+        <field name="code">C4</field>
+        <field name="sequence">60</field>
+        <field name="color">7</field>
+    </record>
+    <record id="sky_socio_categoria_cadete5" model="sky.socio.categoria">
+        <field name="name">Cadete5</field>
+        <field name="code">C5</field>
+        <field name="sequence">70</field>
+        <field name="color">8</field>
+    </record>
+    <record id="sky_socio_categoria_cadete6" model="sky.socio.categoria">
+        <field name="name">Cadete6</field>
+        <field name="code">C6</field>
+        <field name="sequence">80</field>
+        <field name="color">9</field>
+    </record>
+    <record id="sky_socio_categoria_ausente" model="sky.socio.categoria">
+        <field name="name">Ausente</field>
+        <field name="code">AUS</field>
+        <field name="sequence">90</field>
+        <field name="color">10</field>
+    </record>
+    <record id="sky_socio_categoria_honorario" model="sky.socio.categoria">
+        <field name="name">Honorario</field>
+        <field name="code">HON</field>
+        <field name="sequence">100</field>
+        <field name="color">11</field>
+    </record>
+    <record id="sky_socio_categoria_temporario" model="sky.socio.categoria">
+        <field name="name">Temporario</field>
+        <field name="code">TMP</field>
+        <field name="sequence">110</field>
+        <field name="color">1</field>
+    </record>
+    <record id="sky_socio_categoria_vitalicio" model="sky.socio.categoria">
+        <field name="name">Vitalicio</field>
+        <field name="code">VIT</field>
+        <field name="sequence">120</field>
+        <field name="color">12</field>
+    </record>
+    <record id="sky_socio_categoria_fallecido" model="sky.socio.categoria">
+        <field name="name">Fallecido</field>
+        <field name="code">FAL</field>
+        <field name="sequence">130</field>
+        <field name="color">0</field>
+    </record>
+    <record id="sky_socio_categoria_cesante" model="sky.socio.categoria">
+        <field name="name">Cesante</field>
+        <field name="code">CES</field>
+        <field name="sequence">140</field>
+        <field name="color">0</field>
+    </record>
+    <record id="sky_socio_categoria_renunciado" model="sky.socio.categoria">
+        <field name="name">Renunciado</field>
+        <field name="code">REN</field>
+        <field name="sequence">150</field>
+        <field name="color">0</field>
+    </record>
+</odoo>

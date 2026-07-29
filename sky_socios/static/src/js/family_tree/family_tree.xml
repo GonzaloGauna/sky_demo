@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="sky_socios.FamilyTree">
+        <div class="o_sky_family_tree">
+            <t t-if="state.loading">
+                <div class="o_sky_family_tree_loading">Cargando...</div>
+            </t>
+            <t t-elif="state.data and state.data.invalid">
+                <div class="alert alert-warning o_sky_family_tree_warning">
+                    <t t-esc="state.data.warning"/>
+                </div>
+            </t>
+            <t t-if="state.data">
+                <div class="o_sky_family_tree_title">
+                    <h2><t t-esc="state.data.family.name"/></h2>
+                    <span class="text-muted"><t t-esc="state.data.family.member_count"/> miembros</span>
+                </div>
+                <div class="o_sky_family_tree_top">
+                    <t t-foreach="state.data.top" t-as="node" t-key="node.id">
+                        <div class="o_sky_family_tree_node" t-on-click="() => openPartner(node.id)">
+                            <img t-att-src="imageSrc(node)" alt="foto"/>
+                            <div class="o_sky_family_tree_node_body">
+                                <strong><t t-esc="node.name"/></strong>
+                                <span><t t-esc="node.age"/> años</span>
+                                <span class="o_sky_family_tree_chip" t-att-style="categoryStyle(node)">
+                                    <t t-esc="node.category &amp;&amp; node.category.name"/>
+                                </span>
+                            </div>
+                        </div>
+                    </t>
+                </div>
+                <div class="o_sky_family_tree_children" t-if="state.data.children.length">
+                    <t t-foreach="state.data.children" t-as="node" t-key="node.id">
+                        <div class="o_sky_family_tree_node o_sky_family_tree_child" t-on-click="() => openPartner(node.id)">
+                            <img t-att-src="imageSrc(node)" alt="foto"/>
+                            <div class="o_sky_family_tree_node_body">
+                                <strong><t t-esc="node.name"/></strong>
+                                <span><t t-esc="node.age"/> años</span>
+                                <span class="o_sky_family_tree_chip" t-att-style="categoryStyle(node)">
+                                    <t t-esc="node.category &amp;&amp; node.category.name"/>
+                                </span>
+                            </div>
+                        </div>
+                    </t>
+                </div>
+            </t>
+        </div>
+    </t>
+</templates>

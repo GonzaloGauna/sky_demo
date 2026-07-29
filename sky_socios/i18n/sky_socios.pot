@@ -1,0 +1,33 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* sky_socios
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 19.0\n"
+"POT-Creation-Date: 2026-07-21 00:00+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#. module: sky_socios
+#: model:ir.ui.menu,name:sky_socios.menu_sky_socios_root
+msgid "Socios"
+msgstr ""
+
+#. module: sky_socios
+#: model:ir.ui.menu,name:sky_socios.menu_sky_socios_familias
+msgid "Familias"
+msgstr ""
+
+#. module: sky_socios
+#: model:ir.ui.menu,name:sky_socios.menu_sky_socios_configuracion
+msgid "Configuración"
+msgstr ""
+
+#. module: sky_socios
+#: model:ir.ui.menu,name:sky_socios.menu_sky_socios_categorias
+msgid "Categorías"
+msgstr ""

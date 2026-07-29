@@ -1,0 +1,30 @@
+{
+    "name": "Sky Socios",
+    "version": "19.0.1.0.0",
+    "author": "Gonzalo",
+    "category": "Contacts",
+    "summary": "Gestión de socios, familias y recategorización asistida",
+    "license": "LGPL-3",
+    "depends": ["contacts", "mail"],
+    "data": [
+        "security/ir.model.access.csv",
+        "data/sky_socio_categoria_data.xml",
+        "data/sky_socios_demo_cron.xml",
+        "views/sky_socio_categoria_views.xml",
+        "views/sky_familia_views.xml",
+        "views/res_partner_views.xml",
+        "views/wizards/sky_socio_recategorizar_hijo_views.xml",
+        "views/wizards/sky_socio_recategorizar_vitalicio_views.xml",
+        "views/wizards/sky_socio_recategorizar_cadete_views.xml",
+        "views/sky_socios_menus.xml",
+    ],
+    "assets": {
+        "web.assets_backend": [
+            "sky_socios/static/src/js/family_tree/family_tree.js",
+            "sky_socios/static/src/js/family_tree/family_tree.xml",
+            "sky_socios/static/src/scss/family_tree.scss",
+        ],
+    },
+    "installable": True,
+    "application": False,
+}

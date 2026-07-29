@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_sky_socio_recategorizar_hijo_form" model="ir.ui.view">
+        <field name="name">sky.socio.recategorizar.hijo.form</field>
+        <field name="model">sky.socio.recategorizar.hijo</field>
+        <field name="arch" type="xml">
+            <form string="Pasar hijo/a a Activo">
+                <sheet>
+                    <group>
+                        <field name="can_confirm" invisible="1"/>
+                        <field name="partner_id"/>
+                        <field name="current_category_id" readonly="1"/>
+                        <field name="suggested_category_id" readonly="1"/>
+                        <field name="new_group_familiar"/>
+                        <field name="reason" readonly="1"/>
+                        <field name="observation"/>
+                    </group>
+                    <footer>
+                        <button name="action_confirm" type="object" string="Confirmar" class="btn-primary" invisible="not can_confirm"/>
+                        <button string="Cancelar" special="cancel" class="btn-secondary"/>
+                    </footer>
+                </sheet>
+            </form>
+        </field>
+    </record>
+</odoo>
