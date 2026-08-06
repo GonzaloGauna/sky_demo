@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <function model="sky.socios.demo.generator" name="_protect_demo_xmlids"/>
+</odoo>

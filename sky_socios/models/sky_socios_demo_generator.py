@@ -16,7 +16,7 @@ class SkySociosDemoGenerator(models.AbstractModel):
             "name": name,
             "model": record._name,
             "res_id": record.id,
-            "noupdate": False,
+            "noupdate": True,
         }
         if existing:
             existing.write(vals)
@@ -40,6 +40,17 @@ class SkySociosDemoGenerator(models.AbstractModel):
     def _country_ar(self):
         country = self.env.ref("base.ar", raise_if_not_found=False)
         return country.id if country else False
+
+    @api.model
+    def _protect_demo_xmlids(self):
+        self.env["ir.model.data"].sudo().search(
+            [
+                ("module", "=", "sky_socios"),
+                ("name", "like", "sky_demo_%"),
+                ("model", "in", ["res.partner", "sky.familia"]),
+            ]
+        ).write({"noupdate": True})
+        return True
 
     def _family_values(self):
         return [

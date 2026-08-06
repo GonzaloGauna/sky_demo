@@ -9,6 +9,7 @@
     "data": [
         "security/ir.model.access.csv",
         "data/sky_socio_categoria_data.xml",
+        "data/sky_socios_demo_xmlids.xml",
         "data/sky_socios_demo_cron.xml",
         "views/sky_socio_categoria_views.xml",
         "views/sky_familia_views.xml",
