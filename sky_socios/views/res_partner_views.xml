@@ -43,18 +43,9 @@
                             <field name="edad" readonly="1"/>
                         </group>
                     </group>
-                    <group string="Comunicación">
-                        <field name="phone"/>
+                    <group string="Comunicación adicional">
                         <field name="phone_aux"/>
-                        <field name="email"/>
                         <field name="email_aux"/>
-                    </group>
-                    <group string="Dirección">
-                        <field name="street"/>
-                        <field name="city"/>
-                        <field name="zip"/>
-                        <field name="state_id"/>
-                        <field name="country_id"/>
                     </group>
                     <group string="Otros datos">
                         <field name="fecha_renuncia"/>
