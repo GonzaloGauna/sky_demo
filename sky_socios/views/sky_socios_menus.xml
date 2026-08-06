@@ -6,9 +6,10 @@
     </record>
     <record id="menu_sky_socios_socios" model="ir.ui.menu">
         <field name="name">Socios</field>
-        <field name="parent_id" ref="menu_sky_socios_root"/>
+        <field name="parent_id" ref="contacts.menu_contacts"/>
         <field name="action" ref="action_res_partner_sky_socios"/>
-        <field name="active" eval="False"/>
+        <field name="sequence">3</field>
+        <field name="active" eval="True"/>
     </record>
 
     <menuitem id="menu_sky_socios_familias" name="Familias" parent="contacts.menu_contacts" action="action_sky_familia" sequence="4"/>

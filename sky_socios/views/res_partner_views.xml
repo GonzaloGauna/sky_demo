@@ -24,6 +24,7 @@
                         <field name="is_categoria_activo" invisible="1"/>
                         <field name="is_categoria_cadete" invisible="1"/>
                         <group string="Identificación">
+                            <field name="tipo_registro"/>
                             <field name="apellido"/>
                             <field name="nombre"/>
                             <field name="genero"/>
