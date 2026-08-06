@@ -7,10 +7,16 @@
         <field name="arch" type="xml">
             <xpath expr="//form/sheet" position="before">
                 <header>
-                <button name="action_open_recategorizar_hijo_wizard" type="object" string="Pasar hijo/a a Activo" class="btn-primary" invisible="tipo_registro != 'socio' or grupo_familiar != 'hijo'"/>
-                <button name="action_open_recategorizar_vitalicio_wizard" type="object" string="Pasar a Vitalicio" class="btn-secondary" invisible="tipo_registro != 'socio' or not is_categoria_activo"/>
-                <button name="action_open_recategorizar_cadete_wizard" type="object" string="Recategorizar por edad" class="btn-secondary" invisible="tipo_registro != 'socio' or (not is_categoria_cadete and grupo_familiar != 'hijo')"/>
+                    <button name="action_open_recategorizar_hijo_wizard" type="object" string="Pasar hijo/a a Activo" class="btn-primary" invisible="tipo_registro != 'socio' or grupo_familiar != 'hijo'"/>
+                    <button name="action_open_recategorizar_vitalicio_wizard" type="object" string="Pasar a Vitalicio" class="btn-secondary" invisible="tipo_registro != 'socio' or not is_categoria_activo"/>
+                    <button name="action_open_recategorizar_cadete_wizard" type="object" string="Recategorizar por edad" class="btn-secondary" invisible="tipo_registro != 'socio' or (not is_categoria_cadete and grupo_familiar != 'hijo')"/>
                 </header>
+            </xpath>
+            <xpath expr="//field[@name='company_type']" position="after">
+                <field name="tipo_registro" widget="radio" options="{'horizontal': true}"/>
+            </xpath>
+            <xpath expr="//field[@name='category_id']" position="after">
+                <field name="categoria_socio_id" invisible="tipo_registro != 'socio'"/>
             </xpath>
             <xpath expr="//sheet/notebook" position="inside">
                 <page string="Socio" invisible="tipo_registro != 'socio'">
@@ -18,7 +24,6 @@
                         <field name="is_categoria_activo" invisible="1"/>
                         <field name="is_categoria_cadete" invisible="1"/>
                         <group string="Identificación">
-                            <field name="tipo_registro"/>
                             <field name="apellido"/>
                             <field name="nombre"/>
                             <field name="genero"/>
@@ -65,6 +70,40 @@
         <field name="res_model">res.partner</field>
         <field name="view_mode">list,form,kanban</field>
         <field name="domain">[('tipo_registro', '=', 'socio')]</field>
-        <field name="context">{'default_tipo_registro': 'socio', 'search_default_tipo_registro': 1}</field>
+        <field name="context">{'default_tipo_registro': 'socio', 'search_default_sky_tipo_socio': 1}</field>
+    </record>
+
+    <record id="view_partner_tree_inherit_sky_socios" model="ir.ui.view">
+        <field name="name">res.partner.list.sky.socios</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='email']" position="after">
+                <field name="tipo_registro" optional="show"/>
+                <field name="categoria_socio_id" optional="hide"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_res_partner_filter_inherit_sky_socios" model="ir.ui.view">
+        <field name="name">res.partner.search.sky.socios</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_res_partner_filter"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='category_id']" position="after">
+                <field name="tipo_registro"/>
+                <field name="categoria_socio_id"/>
+            </xpath>
+            <xpath expr="//filter[@name='type_company']" position="after">
+                <separator/>
+                <filter string="Socios" name="sky_tipo_socio" domain="[('tipo_registro', '=', 'socio')]"/>
+                <filter string="Proveedores" name="sky_tipo_proveedor" domain="[('tipo_registro', '=', 'proveedor')]"/>
+                <filter string="Otras cuentas" name="sky_tipo_otra_cuenta" domain="[('tipo_registro', '=', 'otra_cuenta')]"/>
+            </xpath>
+            <xpath expr="//group[@name='group_by']" position="inside">
+                <filter string="Clasificación" name="sky_group_tipo_registro" context="{'group_by': 'tipo_registro'}"/>
+                <filter string="Categoría de socio" name="sky_group_categoria_socio" context="{'group_by': 'categoria_socio_id'}"/>
+            </xpath>
+        </field>
     </record>
 </odoo>

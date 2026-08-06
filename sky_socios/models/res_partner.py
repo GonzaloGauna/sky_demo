@@ -12,10 +12,15 @@ SOCIO_CODE_RE = re.compile(r"^[A-Za-z0-9._/-]+$")
 
 
 class ResPartner(models.Model):
+    _name = "res.partner"
     _inherit = ["res.partner", "mail.thread", "mail.activity.mixin"]
 
     tipo_registro = fields.Selection(
-        [("socio", "Socio"), ("otra_cuenta", "Otra cuenta")],
+        [
+            ("socio", "Socios"),
+            ("proveedor", "Proveedores"),
+            ("otra_cuenta", "Otras cuentas"),
+        ],
         string="Tipo de registro",
         required=True,
         default="otra_cuenta",

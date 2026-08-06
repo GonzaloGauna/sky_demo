@@ -347,7 +347,7 @@ class SkySociosDemoGenerator(models.AbstractModel):
                 "sky_demo_contacto_proveedor",
                 {
                     "name": "Proveedor Demo Club",
-                    "tipo_registro": "otra_cuenta",
+                    "tipo_registro": "proveedor",
                     "email": "proveedor.demo@example.com",
                     "phone": "+54 11 4000-1099",
                     "street": "Calle Servicio 900",

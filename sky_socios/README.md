@@ -7,7 +7,7 @@ Decisiones de diseño
 --------------------
 
 - ``res.partner`` se amplía por herencia clásica.
-- ``tipo_registro`` discrimina entre ``socio`` y ``otra_cuenta``.
+- ``tipo_registro`` discrimina entre ``socio``, ``proveedor`` y ``otra_cuenta``.
 - El nombre visible de un socio se compone como ``Apellido, Nombre`` mediante ``name_get`` y sincronización del campo ``name``.
 - Las categorías viven en ``sky.socio.categoria`` y son configurables desde la UI.
 - La familia vive en ``sky.familia``.
@@ -69,6 +69,6 @@ Categorías precargadas
 Notas
 -----
 
-- ``phone``, ``email``, ``mobile``, ``street``, ``city``, ``zip``, ``state_id`` y ``country_id`` se reutilizan desde Odoo estándar.
+- ``phone``, ``email``, ``street``, ``city``, ``zip``, ``state_id`` y ``country_id`` se reutilizan desde Odoo estándar.
 - ``tipo_registro`` se usa para mostrar u ocultar los bloques específicos de socios.
 - ``email_aux`` y ``codigo`` tienen validación de formato y unicidad funcional.
