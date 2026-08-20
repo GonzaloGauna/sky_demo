@@ -49,6 +49,24 @@
         <field name="res_model">product.template</field>
         <field name="view_mode">list,form</field>
         <field name="domain">[('is_room','=',True)]</field>
+        <field name="context">{
+            'default_is_room': True,
+            'default_type': 'consu',
+            'default_is_storable': False,
+            'default_status': 'available',
+            'default_is_room_avail': True,
+            'default_room_type': 'single',
+            'default_num_person': 1
+        }</field>
+    </record>
+
+    <record id="action_normalize_hotel_rooms" model="ir.actions.server">
+        <field name="name">Normalize Hotel Rooms</field>
+        <field name="model_id" ref="product.model_product_template"/>
+        <field name="binding_model_id" ref="product.model_product_template"/>
+        <field name="binding_view_types">list,form</field>
+        <field name="state">code</field>
+        <field name="code">action = records.action_normalize_hotel_rooms()</field>
     </record>
 
     <!--    Rooms Menu-->
