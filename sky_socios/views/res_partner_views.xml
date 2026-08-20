@@ -10,7 +10,11 @@
                     <button name="action_open_recategorizar_hijo_wizard" type="object" string="Pasar hijo/a a Activo" class="btn-primary" invisible="tipo_registro != 'socio' or grupo_familiar != 'hijo'"/>
                     <button name="action_open_recategorizar_vitalicio_wizard" type="object" string="Pasar a Vitalicio" class="btn-secondary" invisible="tipo_registro != 'socio' or not is_categoria_activo"/>
                     <button name="action_open_recategorizar_cadete_wizard" type="object" string="Recategorizar por edad" class="btn-secondary" invisible="tipo_registro != 'socio' or (not is_categoria_cadete and grupo_familiar != 'hijo')"/>
+                    <button name="action_confirmar_renuncia" type="object" string="Renuncia" class="btn-secondary" invisible="tipo_registro != 'socio' or not fecha_renuncia"/>
                 </header>
+            </xpath>
+            <xpath expr="//field[@name='function']" position="replace">
+                <field name="invitado_por_familia_id" invisible="tipo_registro != 'socio'"/>
             </xpath>
             <xpath expr="//field[@name='company_type']" position="after">
                 <field name="tipo_registro" widget="radio" options="{'horizontal': true}"/>
@@ -32,6 +36,7 @@
                             <field name="estado_civil"/>
                             <field name="activa"/>
                             <field name="codigo"/>
+                            <field name="anios_desde_pase" readonly="1"/>
                         </group>
                         <group string="Institucionales">
                             <field name="categoria_socio_id"/>
@@ -73,6 +78,8 @@
             <xpath expr="//field[@name='email']" position="after">
                 <field name="tipo_registro" optional="show"/>
                 <field name="categoria_socio_id" optional="hide"/>
+                <field name="familia_id" optional="show"/>
+                <field name="grupo_familiar" optional="show"/>
             </xpath>
         </field>
     </record>
@@ -85,6 +92,7 @@
             <xpath expr="//field[@name='category_id']" position="after">
                 <field name="tipo_registro"/>
                 <field name="categoria_socio_id"/>
+                <field name="familia_id"/>
             </xpath>
             <xpath expr="//filter[@name='type_company']" position="after">
                 <separator/>
@@ -95,6 +103,21 @@
             <xpath expr="//group[@name='group_by']" position="inside">
                 <filter string="Clasificación" name="sky_group_tipo_registro" context="{'group_by': 'tipo_registro'}"/>
                 <filter string="Categoría de socio" name="sky_group_categoria_socio" context="{'group_by': 'categoria_socio_id'}"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_res_partner_filter_family_inherit_sky_socios" model="ir.ui.view">
+        <field name="name">res.partner.search.family.sky.socios</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_res_partner_filter"/>
+        <field name="arch" type="xml">
+            <xpath expr="//filter[@name='type_company']" position="after">
+                <filter string="La familia" name="sky_tiene_familia" domain="[('familia_id', '!=', False)]"/>
+            </xpath>
+            <xpath expr="//group[@name='group_by']" position="inside">
+                <filter string="Familia" name="sky_group_familia" context="{'group_by': 'familia_id'}"/>
+                <filter string="Grupo familiar" name="sky_group_grupo_familiar" context="{'group_by': 'grupo_familiar'}"/>
             </xpath>
         </field>
     </record>

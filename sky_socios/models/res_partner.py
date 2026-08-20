@@ -75,8 +75,14 @@ class ResPartner(models.Model):
         tracking=True,
         ondelete="set null",
     )
+    invitado_por_familia_id = fields.Many2one(
+        "sky.familia",
+        string="Invitado por",
+        tracking=True,
+    )
     fecha_ingreso = fields.Date(string="Fecha de ingreso", tracking=True)
     fecha_pase = fields.Date(string="Fecha de pase", tracking=True)
+    anios_desde_pase = fields.Integer(string="Años desde el pase", compute="_compute_years_from_pase")
     pais_residencia_id = fields.Many2one("res.country", string="País de residencia", tracking=True)
     phone_aux = fields.Char(string="Teléfono auxiliar", tracking=True)
     email_aux = fields.Char(string="E-mail auxiliar", tracking=True)
@@ -87,11 +93,19 @@ class ResPartner(models.Model):
     is_categoria_activo = fields.Boolean(string="Categoría activa", compute="_compute_category_flags", tracking=True)
     is_categoria_cadete = fields.Boolean(string="Categoría cadete", compute="_compute_category_flags", tracking=True)
 
+    grupo_familiar_sequence = fields.Integer(string="Orden familiar", compute="_compute_family_order", store=True)
+
     @api.depends("fecha_nacimiento")
     def _compute_age(self):
         today = fields.Date.context_today(self)
         for partner in self:
             partner.edad = relativedelta(today, partner.fecha_nacimiento).years if partner.fecha_nacimiento else 0
+
+    @api.depends("fecha_pase")
+    def _compute_years_from_pase(self):
+        today = fields.Date.context_today(self)
+        for partner in self:
+            partner.anios_desde_pase = relativedelta(today, partner.fecha_pase).years if partner.fecha_pase else 0
 
     @api.depends("categoria_socio_id", "categoria_socio_id.name")
     def _compute_category_flags(self):
@@ -99,6 +113,18 @@ class ResPartner(models.Model):
             category_name = partner.categoria_socio_id.name if partner.categoria_socio_id else ""
             partner.is_categoria_activo = category_name == "Activo"
             partner.is_categoria_cadete = category_name.startswith("Cadete")
+
+    @api.depends("grupo_familiar", "categoria_socio_id", "categoria_socio_id.sequence", "fecha_nacimiento")
+    def _compute_family_order(self):
+        role_order = {
+            "jefe": 10,
+            "conyuge": 20,
+            "hijo": 30,
+            "individual": 90,
+        }
+        for partner in self:
+            category_sequence = partner.categoria_socio_id.sequence if partner.categoria_socio_id else 99
+            partner.grupo_familiar_sequence = role_order.get(partner.grupo_familiar, 99) + category_sequence
 
     def _socio_display_name(self):
         self.ensure_one()
@@ -154,8 +180,11 @@ class ResPartner(models.Model):
         vals = self._sync_socio_name(vals)
         old_families = self.mapped("familia_id")
         result = super().write(vals)
-        self._check_partner_constraints()
-        (old_families | self.mapped("familia_id"))._check_member_role_constraints()
+        constraint_fields = {"tipo_registro", "codigo", "email_aux", "grupo_familiar", "familia_id"}
+        if constraint_fields.intersection(vals):
+            self._check_partner_constraints()
+        if {"familia_id", "grupo_familiar"}.intersection(vals):
+            (old_families | self.mapped("familia_id"))._check_member_role_constraints()
         return result
 
     def _check_partner_constraints(self):
@@ -252,6 +281,22 @@ class ResPartner(models.Model):
             "target": "new",
             "context": {"default_partner_id": self.id},
         }
+
+    def action_confirmar_renuncia(self):
+        for partner in self:
+            if partner.tipo_registro != "socio" or not partner.fecha_renuncia:
+                continue
+            vals = {"activa": False}
+            renunciado = partner._get_category_by_name("Renunciado")
+            if renunciado:
+                vals["categoria_socio_id"] = renunciado.id
+            partner.write(vals)
+            partner._post_recategorization_message(
+                _("Renuncia confirmada"),
+                "",
+                _("Se registró la renuncia del socio con fecha %s.") % partner.fecha_renuncia,
+            )
+        return True
 
     def action_apply_recategorizar_hijo(self, target_category_id, new_group_familiar, observation=""):
         self.ensure_one()

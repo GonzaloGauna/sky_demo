@@ -11,7 +11,7 @@ class SkyFamilia(models.Model):
     _inherit = ["mail.thread", "mail.activity.mixin"]
     _order = "name, id"
 
-    name = fields.Char(string="Nombre", required=True, tracking=True)
+    name = fields.Char(string="Código", required=True, tracking=True)
     jefe_id = fields.Many2one(
         "res.partner",
         string="Jefe",
@@ -33,7 +33,7 @@ class SkyFamilia(models.Model):
         placeholder = "/web/static/img/placeholder.png"
         for family in self:
             images = []
-            for member in family.member_ids[:4]:
+            for member in family._get_ordered_members()[:4]:
                 image_url = (
                     f"/web/image/res.partner/{member.id}/image_1920?unique={member.write_date.isoformat() if member.write_date else member.id}"
                     if member.image_1920
@@ -58,6 +58,16 @@ class SkyFamilia(models.Model):
     def _constrains_member_roles(self):
         self._check_member_role_constraints()
 
+    def _get_ordered_members(self):
+        self.ensure_one()
+        return self.member_ids.sorted(
+            key=lambda partner: (
+                partner.grupo_familiar_sequence or 99,
+                partner.fecha_nacimiento or date.max,
+                partner.id,
+            )
+        )
+
     def unlink(self):
         members = self.member_ids
         if members:
@@ -75,7 +85,7 @@ class SkyFamilia(models.Model):
 
     def get_family_tree_data(self):
         self.ensure_one()
-        members = self.member_ids.filtered(lambda partner: partner.tipo_registro == "socio")
+        members = self._get_ordered_members().filtered(lambda partner: partner.tipo_registro == "socio")
         chiefs = members.filtered(lambda partner: partner.grupo_familiar == "jefe")
         spouses = members.filtered(lambda partner: partner.grupo_familiar == "conyuge")
         children = members.filtered(lambda partner: partner.grupo_familiar == "hijo").sorted(

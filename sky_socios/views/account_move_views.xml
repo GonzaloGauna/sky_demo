@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_account_invoice_filter_inherit_sky_socios" model="ir.ui.view">
+        <field name="name">account.invoice.search.sky.socios</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_account_invoice_filter"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='partner_id']" position="after">
+                <field name="familia_id"/>
+            </xpath>
+            <xpath expr="//filter[@name='partner']" position="after">
+                <filter string="Familia" name="sky_group_by_familia" context="{'group_by': 'familia_id'}"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_account_move_filter_inherit_sky_socios" model="ir.ui.view">
+        <field name="name">account.move.search.sky.socios</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_account_move_filter"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='partner_id']" position="after">
+                <field name="familia_id"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

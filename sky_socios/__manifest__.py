@@ -5,7 +5,7 @@
     "category": "Contacts",
     "summary": "Gestión de socios, familias y recategorización asistida",
     "license": "LGPL-3",
-    "depends": ["contacts", "mail"],
+    "depends": ["contacts", "mail", "account"],
     "data": [
         "security/ir.model.access.csv",
         "data/sky_socio_categoria_data.xml",
@@ -14,6 +14,7 @@
         "views/sky_socio_categoria_views.xml",
         "views/sky_familia_views.xml",
         "views/res_partner_views.xml",
+        "views/account_move_views.xml",
         "views/wizards/sky_socio_recategorizar_hijo_views.xml",
         "views/wizards/sky_socio_recategorizar_vitalicio_views.xml",
         "views/wizards/sky_socio_recategorizar_cadete_views.xml",

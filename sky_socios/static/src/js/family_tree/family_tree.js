@@ -34,7 +34,7 @@ class SkyFamilyTree extends Component {
     }
 
     imageSrc(node) {
-        if (!node.image_1920) {
+        if (!node.has_image) {
             return placeholder;
         }
         return imageUrl("res.partner", node.id, "image_1920", {
