@@ -1,5 +1,6 @@
 id,name,model_id/id,group_id/id,perm_read,perm_write,perm_create,perm_unlink
 access_custom_sale_subscription_template,sale.subscription.template,model_sale_subscription_template,sales_team.group_sale_salesman,1,1,1,1
+access_sale_subscription_template_payment_cut,sale.subscription.template.payment.cut,model_sale_subscription_template_payment_cut,sales_team.group_sale_salesman,1,1,1,1
 access_custom_sale_subscription,sale.subscription,model_sale_subscription,sales_team.group_sale_salesman,1,1,1,1
 access_custom_sale_subscription_close_reason,sale.subscription.close.reason,model_sale_subscription_close_reason,sales_team.group_sale_salesman,1,1,1,1
 access_custom_sale_subscription_stage,sale.subscription.stage,model_sale_subscription_stage,sales_team.group_sale_salesman,1,1,1,1

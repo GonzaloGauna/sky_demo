@@ -60,6 +60,11 @@ class SaleSubscriptionTemplate(models.Model):
     subscription_count = fields.Integer(
         compute="_compute_subscription_count", string="subscription_ids"
     )
+    payment_cut_ids = fields.One2many(
+        comodel_name="sale.subscription.template.payment.cut",
+        inverse_name="template_id",
+        string="Cortes de pago",
+    )
 
     def _compute_subscription_count(self):
         data = self.env["sale.subscription"]._read_group(
@@ -100,3 +105,34 @@ class SaleSubscriptionTemplate(models.Model):
             "type": "ir.actions.act_window",
             "domain": [("id", "in", self.product_ids.ids)],
         }
+
+
+class SaleSubscriptionTemplatePaymentCut(models.Model):
+    _name = "sale.subscription.template.payment.cut"
+    _description = "Corte de pago de plantilla de suscripción"
+    _order = "sequence, cutoff_date, id"
+
+    sequence = fields.Integer(default=10)
+    template_id = fields.Many2one(
+        comodel_name="sale.subscription.template",
+        string="Plantilla de suscripción",
+        required=True,
+        ondelete="cascade",
+    )
+    cutoff_date = fields.Date(string="Fecha de corte de facturación", required=True)
+    due_date = fields.Date(string="Fecha de vencimiento")
+    pricelist_id = fields.Many2one(
+        comodel_name="product.pricelist",
+        string="Lista de precios",
+    )
+    interest_type = fields.Selection(
+        selection=[
+            ("fixed", "Monto fijo"),
+            ("percentage", "Porcentaje"),
+        ],
+        string="Tipo de interés",
+        required=True,
+        default="fixed",
+    )
+    interest_amount = fields.Float(string="Interés", required=True)
+    notes = fields.Char(string="Notas")

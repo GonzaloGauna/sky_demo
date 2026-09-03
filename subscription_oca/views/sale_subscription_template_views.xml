@@ -94,6 +94,19 @@
                                 placeholder="Terms and Conditions"
                             />
                         </page>
+                        <page string="Cortes de pago">
+                            <field name="payment_cut_ids">
+                                <list editable="bottom">
+                                    <field name="sequence" widget="handle" />
+                                    <field name="cutoff_date" />
+                                    <field name="due_date" />
+                                    <field name="pricelist_id" />
+                                    <field name="interest_type" />
+                                    <field name="interest_amount" />
+                                    <field name="notes" />
+                                </list>
+                            </field>
+                        </page>
                     </notebook>
                 </sheet>
             </form>
