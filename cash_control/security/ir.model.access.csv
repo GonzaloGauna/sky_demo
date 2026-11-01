@@ -1,0 +1,10 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_config_user,Cash configuration user,model_pop_config,cash_control.group_pop_user,1,0,0,0
+access_config_manager,Cash configuration manager,model_pop_config,cash_control.group_pop_manager,1,1,1,0
+access_session_user,Cash session user,model_pop_session,cash_control.group_pop_user,1,1,1,0
+access_journal_user,Cash journal user,model_pop_session_journal,cash_control.group_pop_user,1,1,1,0
+access_line_user,Cash line user,model_pop_session_journal_line,cash_control.group_pop_user,1,1,1,0
+access_cash_in,Cash in,model_pop_session_cash_in,cash_control.group_pop_user,1,1,1,1
+access_cash_out,Cash out,model_pop_session_cash_out,cash_control.group_pop_user,1,1,1,1
+access_cash_open,Cash open,model_pop_session_cash_open,cash_control.group_pop_user,1,1,1,1
+access_cash_close,Cash close,model_pop_session_cash_close,cash_control.group_pop_user,1,1,1,1

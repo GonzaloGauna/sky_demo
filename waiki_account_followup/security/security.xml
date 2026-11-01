@@ -1,0 +1,4 @@
+<odoo>
+    <record id="level_company_rule" model="ir.rule"><field name="name">Collection levels: selected companies</field><field name="model_id" ref="model_waiki_followup_level"/><field name="domain_force">[('company_id','in',company_ids)]</field></record>
+    <record id="history_company_rule" model="ir.rule"><field name="name">Collection history: selected companies</field><field name="model_id" ref="model_waiki_followup_history"/><field name="domain_force">[('company_id','in',company_ids)]</field></record>
+</odoo>

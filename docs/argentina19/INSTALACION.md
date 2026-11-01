@@ -15,10 +15,9 @@
 `l10n_ar_afipws_fe`. Pagos y retenciones se implementan mediante
 `account_payment_pro`, `l10n_ar_tax` y las retenciones nativas de Odoo 19.
 
-No se incluyen `fix_change_multicompany`, que desactiva controles de empresa,
-`stock_eliminate_restrictions`, los módulos de liquidaciones fiscales, ni módulos
-ajenos a la prioridad acordada. El `account_followup` recibido declaraba OEEL-1,
-dependencia Enterprise y estaba deshabilitado; no se incorpora a Community.
+El alcance inicial de ocho addons se amplió posteriormente a todos los módulos
+de ambas carpetas Waiki. Consultar la [entrega Waiki completa](../waiki19/INSTALACION.md)
+para instalar el conjunto de 16 addons y revisar sus diferencias funcionales.
 
 ## Adaptaciones
 

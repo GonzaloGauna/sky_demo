@@ -1,0 +1,24 @@
+<odoo>
+    <record id="view_purchase_order_form_waiki" model="ir.ui.view">
+        <field name="name">purchase.order.waiki.selected.companies</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase_stock.purchase_order_view_form_inherit"/>
+        <field name="arch" type="xml">
+            <field name="picking_type_id" position="before"><field name="waiki_stock_company_ids" invisible="1"/></field>
+            <field name="picking_type_id" position="attributes">
+                <attribute name="domain">[('code', '=', 'incoming'), '|', ('company_id', '=', False), ('company_id', 'in', waiki_stock_company_ids)]</attribute>
+            </field>
+        </field>
+    </record>
+    <record id="view_sale_order_form_waiki_warehouse" model="ir.ui.view">
+        <field name="name">sale.order.waiki.selected.warehouses</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale_stock.view_order_form_inherit_sale_stock"/>
+        <field name="arch" type="xml">
+            <field name="warehouse_id" position="before"><field name="waiki_stock_company_ids" invisible="1"/></field>
+            <field name="warehouse_id" position="attributes">
+                <attribute name="domain">[('company_id', 'in', waiki_stock_company_ids)]</attribute>
+            </field>
+        </field>
+    </record>
+</odoo>

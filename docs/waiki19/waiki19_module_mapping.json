@@ -1,0 +1,11 @@
+{
+  "account_followup": "waiki_account_followup (independent Community implementation)",
+  "account_view_localization_ar": "account_view_localization_ar",
+  "cash_control": "cash_control",
+  "dolar_update": "dolar_update",
+  "partner_debt_info": "partner_debt_info",
+  "account_tax_settlement": "account_tax_settlement",
+  "l10n_ar_account_tax_settlement": "l10n_ar_account_tax_settlement",
+  "fix_change_multicompany": "fix_change_multicompany",
+  "stock_eliminate_restrictions": "stock_eliminate_restrictions"
+}

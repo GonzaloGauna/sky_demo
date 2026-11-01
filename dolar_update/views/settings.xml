@@ -1,0 +1,8 @@
+<odoo>
+    <record id="res_config_settings_view_form" model="ir.ui.view"><field name="name">res.config.settings.waiki.rates</field><field name="model">res.config.settings</field><field name="inherit_id" ref="account.res_config_settings_view_form"/>
+        <field name="arch" type="xml"><xpath expr="//app[@name='account']" position="inside"><block title="Cotizaciones Waiki" id="waiki_currency_rates"><setting string="Proveedor de cotizaciones" company_dependent="1"><field name="dolar_update_type"/><field name="waiki_rate_journal_id" invisible="dolar_update_type != 'afip'"/></setting></block></xpath></field>
+    </record>
+    <record id="l10n_ar_res_currency_form" model="ir.ui.view"><field name="name">res.currency.waiki.update</field><field name="model">res.currency</field><field name="inherit_id" ref="base.view_currency_form"/>
+        <field name="arch" type="xml"><xpath expr="//sheet" position="before"><header><button name="update_dolar_button" type="object" string="Actualizar cotizacion Waiki" groups="account.group_account_manager"/></header></xpath></field>
+    </record>
+</odoo>

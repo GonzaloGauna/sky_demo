@@ -1,0 +1,11 @@
+{'name': 'Waiki Partner Debt Information',
+ 'version': '19.0.1.0.0',
+ 'category': 'Accounting/Accounting',
+ 'summary': 'Company-scoped debt and current-account ledger',
+ 'author': 'Waiki Consultores en Sistemas, Sky Demo',
+ 'license': 'AGPL-3',
+ 'depends': ['account'],
+ 'data': ['views/partner.xml'],
+ 'installable': True,
+ 'auto_install': False,
+ 'application': False}
