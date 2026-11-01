@@ -1,0 +1,11 @@
+{'name': 'Waiki Currency Rate Updates',
+ 'version': '19.0.1.0.0',
+ 'category': 'Accounting/Accounting',
+ 'summary': 'Company-specific BNA and ARCA exchange rates',
+ 'author': 'Waiki, Sky Demo',
+ 'license': 'AGPL-3',
+ 'depends': ['l10n_ar_fiscal_ws'],
+ 'data': ['views/settings.xml', 'data/cron.xml'],
+ 'installable': True,
+ 'auto_install': False,
+ 'application': False}

@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_index_user,Inflation indices read,model_inflation_adjustment_index,account.group_account_user,1,0,0,0
+access_index_manager,Inflation indices manage,model_inflation_adjustment_index,account.group_account_manager,1,1,1,1
+access_adjustment,Inflation adjustment,model_inflation_adjustment,account.group_account_manager,1,1,1,1
+access_setup,Settlement configuration,model_waiki_tax_settlement_setup,account.group_account_manager,1,1,1,1

@@ -1,0 +1,1 @@
+<odoo><record id="cron_followup" model="ir.cron"><field name="name">Cobranzas Waiki</field><field name="model_id" ref="base.model_res_partner"/><field name="state">code</field><field name="code">model._cron_waiki_followup()</field><field name="interval_number">1</field><field name="interval_type">days</field><field name="active" eval="False"/></record></odoo>

@@ -1,0 +1,11 @@
+{'name': 'Waiki Explicit Cross-company Logistics',
+ 'version': '19.0.1.0.0',
+ 'category': 'Inventory/Inventory',
+ 'summary': 'Opt-in selected-company warehouse links for Odoo 19',
+ 'author': 'Waiki, Sky Demo',
+ 'license': 'AGPL-3',
+ 'depends': ['sale_stock', 'purchase_stock', 'stock_account', 'fix_change_multicompany'],
+ 'data': ['views/company.xml', 'views/orders.xml'],
+ 'installable': True,
+ 'auto_install': False,
+ 'application': False}

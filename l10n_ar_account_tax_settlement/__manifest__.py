@@ -1,0 +1,13 @@
+{'name': 'Waiki Argentine Tax Settlements',
+ 'version': '19.0.1.0.0',
+ 'category': 'Accounting/Accounting',
+ 'summary': 'Argentine settlement files and monthly inflation adjustments',
+ 'author': 'ADHOC SA, Waiki, Sky Demo',
+ 'license': 'LGPL-3',
+ 'depends': ['account_tax_settlement', 'l10n_ar_tax'],
+ 'data': ['security/ir.model.access.csv',
+          'data/inflation_adjustment_index.xml',
+          'views/settlement.xml'],
+ 'installable': True,
+ 'auto_install': False,
+ 'application': False}

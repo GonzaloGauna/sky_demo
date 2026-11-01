@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Tree view with green color for domestic positions -->
+    <record id="view_account_fiscal_position_tree_ux" model="ir.ui.view">
+        <field name="name">account.fiscal.position.tree.ux</field>
+        <field name="model">account.fiscal.position</field>
+        <field name="inherit_id" ref="account.view_account_position_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//list" position="attributes">
+                <attribute name="decoration-success">is_domestic</attribute>
+                <attribute name="decoration-bf">is_domestic</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Which branches this position autodetects in -->
+    <record id="view_account_fiscal_position_form_shared_to_branches" model="ir.ui.view">
+        <field name="name">account.fiscal.position.form.shared.to.branches</field>
+        <field name="model">account.fiscal.position</field>
+        <field name="inherit_id" ref="account.view_account_position_form"/>
+        <field name="arch" type="xml">
+            <field name="vat_required" position="after">
+                <field name="has_child_companies" invisible="1"/>
+                <!-- Only the autodetection is scoped: without "Detect Automatically" the
+                     value changes nothing, and without branches every value is the same. -->
+                <field name="shared_to_branches" groups="base.group_multi_company"
+                       invisible="not auto_apply or not has_child_companies"/>
+            </field>
+        </field>
+    </record>
+
+    <!-- Form view with green title for domestic positions -->
+    <record id="view_account_fiscal_position_form_ux" model="ir.ui.view">
+        <field name="name">account.fiscal.position.form.ux</field>
+        <field name="model">account.fiscal.position</field>
+        <field name="inherit_id" ref="account.view_account_position_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='name']" position="attributes">
+                <attribute name="style">color: #28a745; font-weight: bold;</attribute>
+                <attribute name="invisible">not is_domestic</attribute>
+            </xpath>
+            <xpath expr="//field[@name='name']" position="after">
+                <field name="name" invisible="is_domestic" style="font-weight: normal;"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

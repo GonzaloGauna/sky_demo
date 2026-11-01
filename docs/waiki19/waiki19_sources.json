@@ -1,0 +1,56 @@
+[
+  {
+    "source": "waiki-multicompany/fix_change_multicompany",
+    "version": "1.0",
+    "license": "AGPL-3",
+    "manifest_sha256": "a623698da73899ba360dd0964437f61d0792667a5d05dabf27a91e215a097d53"
+  },
+  {
+    "source": "waiki-multicompany/stock_eliminate_restrictions",
+    "version": "1.0",
+    "license": "AGPL-3",
+    "manifest_sha256": "522ea2f9d7e06820f9a2976ec7b6e8946f1bfb8d5c269212ec1961bb0e3cf35e"
+  },
+  {
+    "source": "waikiservicios/account/account_followup",
+    "version": "1.0",
+    "license": "OEEL-1",
+    "manifest_sha256": "012aa9a02bb55080de504a0ff1615a727a94d521583c40e528119a5b0a52a053"
+  },
+  {
+    "source": "waikiservicios/account/account_view_localization_ar",
+    "version": "15.0.1.0.0",
+    "license": "AGPL-3",
+    "manifest_sha256": "9ae1c10d9a3cf0ad6d6142201603f45ef19f030c656bf7b07382aeff506da1da"
+  },
+  {
+    "source": "waikiservicios/account/cash_control",
+    "version": "13.0.1.0.0",
+    "license": "AGPL-3",
+    "manifest_sha256": "7bc692442dc5ce74bf280f7f04da099b06134f9bcaafee30aef71b883b842cfa"
+  },
+  {
+    "source": "waikiservicios/account/dolar_update",
+    "version": "15.0.1.0.0",
+    "license": "AGPL-3",
+    "manifest_sha256": "85fa0fcbada80096ff49409d8864fe16b34a1a134cb41687cc80585de400f5ba"
+  },
+  {
+    "source": "waikiservicios/account/partner_debt_info",
+    "version": "13.0.1.0.0",
+    "license": "AGPL-3",
+    "manifest_sha256": "544a1ee7e3eba5f0af223abb6e6eb10e5c32ebc1efe9663d8a9b0f8c5202ba46"
+  },
+  {
+    "source": "waikiservicios/account-ee/account_tax_settlement",
+    "version": "16.0.1.1.0",
+    "license": "LGPL-3",
+    "manifest_sha256": "e5ccddb43ce2929be1f2a2aca09143fbb59166c4f8e0a6b41379431b13a3bf2d"
+  },
+  {
+    "source": "waikiservicios/account-ee/l10n_ar_account_tax_settlement",
+    "version": "16.0.1.6.0",
+    "license": "LGPL-3",
+    "manifest_sha256": "d81d81ec84f2ba931d5ad39427150d7526bd6d90a39461d65d5f8594bf332d30"
+  }
+]

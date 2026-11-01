@@ -1,0 +1,11 @@
+{'name': 'Waiki Explicit Cross-company Accounting',
+ 'version': '19.0.1.0.0',
+ 'category': 'Accounting/Accounting',
+ 'summary': 'Opt-in cross-company links without changing access rules',
+ 'author': 'Waiki, Sky Demo',
+ 'license': 'AGPL-3',
+ 'depends': ['account_ux'],
+ 'data': ['views/company.xml'],
+ 'installable': True,
+ 'auto_install': False,
+ 'application': False}

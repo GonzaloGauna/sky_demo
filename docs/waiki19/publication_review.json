@@ -1,0 +1,16 @@
+{
+  "checks": {
+    "modules": 16,
+    "python": 276,
+    "xml": 118,
+    "identical_runtime_files": 444
+  },
+  "source_mapping": "waiki19_module_mapping.json",
+  "client_credentials_included": false,
+  "database_dumps_included": false,
+  "enterprise_implementation_included": false,
+  "public_demo_fixture": {
+    "file": "l10n_ar_fiscal_ws/demo/certificate_demo.xml",
+    "sha256": "2b74bc9e8774aec8c06a658cb16166f9a116f8d2a6d9a94568de75091fc2c62f"
+  }
+}
