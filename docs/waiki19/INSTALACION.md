@@ -76,40 +76,41 @@ git -C /opt/odoo19/custom-addons switch migration/argentina-19
 git -C /opt/odoo19/custom-addons pull --ff-only origin migration/argentina-19
 ```
 
-Usar el propietario habitual del checkout para Git. Instalar en la copia
-neutralizada existente, sin ejecutar este comando sobre `sky_demo`. El bloque
-detiene temporalmente el servicio compartido: ambas bases quedan sin acceso
-durante la instalación. Al salir neutraliza la copia y vuelve a iniciar Odoo:
+Usar el propietario habitual del checkout para Git. Instalar o actualizar en la
+copia neutralizada con un unico comando:
 
 ```bash
-(
-    set -e
-    trap 'sudo -u odoo19 /opt/odoo19/venv/bin/python3 /opt/odoo19/odoo/odoo-bin neutralize -c /etc/odoo19/odoo19.conf -d sky_demo_ri; sudo systemctl start odoo19.service' EXIT
-    sudo systemctl stop odoo19.service
-    sudo -u odoo19 /opt/odoo19/venv/bin/python3 /opt/odoo19/odoo/odoo-bin shell \
-        -c /etc/odoo19/odoo19.conf -d sky_demo_ri --no-http --max-cron-threads=0 \
-        < /opt/odoo19/custom-addons/scripts/waiki19/preflight.py
-    sudo -u odoo19 /opt/odoo19/venv/bin/python3 /opt/odoo19/odoo/odoo-bin shell \
-        -c /etc/odoo19/odoo19.conf -d sky_demo_ri --no-http --max-cron-threads=0 <<'PY'
-assert env.cr.dbname == 'sky_demo_ri'
-assert env['ir.config_parameter'].sudo().get_param('database.is_neutralized') == 'true'
-env['ir.config_parameter'].sudo().set_param('l10n_ar_fiscal_ws.env_type', 'homologation')
-env.cr.commit()
-PY
-    sudo -u odoo19 /opt/odoo19/venv/bin/python3 /opt/odoo19/odoo/odoo-bin \
-        -c /etc/odoo19/odoo19.conf -d sky_demo_ri \
-        -i l10n_ar_fiscal_ws,l10n_ar_tax,account_view_localization_ar,partner_debt_info,dolar_update,cash_control,waiki_account_followup,account_tax_settlement,l10n_ar_account_tax_settlement,fix_change_multicompany,stock_eliminate_restrictions \
-        --without-demo --stop-after-init --no-http --max-cron-threads=0
-    sudo -u odoo19 /opt/odoo19/venv/bin/python3 /opt/odoo19/odoo/odoo-bin shell \
-        -c /etc/odoo19/odoo19.conf -d sky_demo_ri --no-http --max-cron-threads=0 \
-        < /opt/odoo19/custom-addons/scripts/argentina19/configure_homologation.py
-)
+sudo bash /opt/odoo19/custom-addons/scripts/waiki19/install_or_update.sh
 ```
 
-Las dependencias completan el conjunto. Si ya están instalados y se actualiza
-esta entrega, usar `-u` con esa misma lista. Antes de instalar, comprobar versión
-19 de Odoo y que no existen módulos antiguos con los mismos nombres en otra ruta.
-No es necesario desinstalar la localización nativa ni borrar datos.
+El script usa exclusivamente `sky_demo_ri`, comprueba Odoo 19, empresa 2 y plan
+`ar_ri`, instala los faltantes con `-i` y actualiza los existentes con `-u`.
+Detiene temporalmente el servicio compartido: ambas bases quedan sin acceso
+durante la instalacion. Al salir neutraliza la copia y, si el servicio estaba
+activo, vuelve a iniciarlo incluso ante un error. El resultado esperado es
+`WAIKI_OK: 16/16 modules installed`.
+
+### Copias que conservan marcas de datos demo
+
+En Odoo 19, `--without-demo` se refiere a la creacion de bases nuevas. En una base
+existente, una dependencia nueva puede cargar demo cuando sus dependencias tienen
+`ir.module.module.demo=True`. La copia del servidor conserva estas marcas: la
+instalacion de `purchase_stock` intento cargar `purchase_stock_demo.xml`, fallo en
+el savepoint de demo y luego intento recalcular una relacion para un pedido que
+se habia revertido. No se confirmaron lineas de compra huerfanas en la consulta.
+
+El nuevo instalador ejecuta `prepare_no_demo.py` antes de instalar: pone en falso
+las marcas de futuras cargas demo de la copia mediante el ORM. **No elimina ni
+modifica los registros de negocio o los registros demo existentes.** La operacion
+es idempotente y queda limitada a `sky_demo_ri`. Tambien fija homologacion. El
+preflight rechaza una base con marcas demo aun activas para evitar repetir el
+mismo fallo. Los asientos, compras y movimientos existentes no se limpian.
+
+Las dependencias completan el conjunto de 16 addons. No es necesario desinstalar
+la localizacion nativa. Si la instalacion falla, conservar el error: Odoo puede
+haber confirmado modulos por etapas. No repetir limpiezas, restauraciones ni
+modificaciones de restricciones para resolverlo. Los scripts no realizan esas
+operaciones.
 
 ## Configuración y aceptación
 

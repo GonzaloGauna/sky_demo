@@ -16,5 +16,8 @@ legacy = env['ir.module.module'].sudo().search([
     ('state', '=', 'installed'),
 ])
 assert not legacy, 'Legacy modules require a separate data-migration review: ' + ', '.join(legacy.mapped('name'))
+assert not env['ir.module.module'].sudo().with_context(active_test=False).search_count([
+    ('demo', '=', True),
+]), 'Run scripts/waiki19/prepare_no_demo.py first: existing module demo flags can load dependency demo data.'
 print('WAIKI_PREFLIGHT_OK: Odoo 19, sky_demo_ri, company 2, ar_ri. No changes saved.')
 env.cr.rollback()
