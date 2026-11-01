@@ -1,0 +1,467 @@
+from odoo import _, api, fields, models
+from odoo.exceptions import UserError, ValidationError
+from odoo.fields import Domain
+from odoo.tools import float_compare
+
+
+class AccountPayment(models.Model):
+    _inherit = "account.payment"
+
+    is_internal_transfer = fields.Boolean(
+        string="Internal Transfer",
+        tracking=True,
+    )
+    destination_company_id = fields.Many2one(
+        "res.company",
+        compute="_compute_destination_company_id",
+        domain='["|", ("id", "parent_of", main_company_id), ("id", "child_of", main_company_id)]',
+        store=True,
+        readonly=False,
+    )
+    destination_journal_domain = fields.Binary(compute="_compute_destination_journal_domain")
+    destination_journal_id = fields.Many2one(
+        comodel_name="account.journal",
+        string="Destination Journal",
+        domain="destination_journal_domain",
+        check_company=False,
+    )
+    destination_payment_method_line_id = fields.Many2one(
+        comodel_name="account.payment.method.line",
+        string="Destination Journal Payment Method",
+        compute="_compute_destination_payment_method_line_id",
+        store=True,
+        readonly=False,
+        copy=False,
+        # the destination journal may belong to another branch
+        check_company=False,
+        help="Payment method line used on the paired payment created in the destination journal. "
+        "It determines the outstanding account of that payment.",
+    )
+    available_destination_payment_method_line_ids = fields.Many2many(
+        comodel_name="account.payment.method.line",
+        compute="_compute_available_destination_payment_method_line_ids",
+    )
+    main_company_id = fields.Many2one(
+        "res.company",
+        compute="_compute_main_company",
+    )
+    available_partner_bank_ids = fields.Many2many(compute_sudo=True)
+
+    @api.depends("company_id", "is_internal_transfer")
+    def _compute_destination_company_id(self):
+        for rec in self:
+            if rec.is_internal_transfer:
+                rec.destination_company_id = rec.company_id
+            else:
+                rec.destination_company_id = False
+
+    @api.depends("destination_company_id", "journal_id")
+    def _compute_destination_journal_domain(self):
+        for rec in self:
+            rec.destination_journal_domain = (
+                Domain(rec.env["account.journal"]._check_company_domain(rec.destination_company_id))
+                & Domain([("type", "in", ("bank", "cash", "credit"))])
+                & Domain([("active", "=", True)])
+            )
+
+    @api.constrains("destination_company_id", "destination_journal_id")
+    def _check_journal_company(self):
+        for rec in self.filtered("destination_journal_id"):
+            # Force recompute of the domain to ensure it's up to date
+            rec._compute_destination_journal_domain()
+            has_cashbox_field = "cashbox_session_id" in rec._fields
+            if (not has_cashbox_field or not rec.cashbox_session_id) and rec.destination_journal_id == rec.journal_id:
+                raise ValidationError(_("The destination journal must be different from the source journal."))
+            if rec.destination_journal_id not in rec.env["account.journal"].search(rec.destination_journal_domain):
+                raise ValidationError(
+                    _("The selected 'Destination Journal' does not belong to the selected destination company.")
+                )
+
+    @api.depends("company_id")
+    def _compute_main_company(self):
+        for rec in self:
+            rec.main_company_id = rec.company_id.parent_id or rec.company_id
+
+    def _get_paired_payment_type(self):
+        """Payment type of the paired payment created in the destination journal."""
+        self.ensure_one()
+        return "inbound" if self.payment_type == "outbound" else "outbound"
+
+    @api.depends("destination_journal_id", "payment_type", "is_internal_transfer")
+    def _compute_available_destination_payment_method_line_ids(self):
+        for pay in self:
+            journal = pay.destination_journal_id
+            if pay.is_internal_transfer and journal:
+                pay.available_destination_payment_method_line_ids = journal._get_available_payment_method_lines(
+                    pay._get_paired_payment_type()
+                )
+            else:
+                pay.available_destination_payment_method_line_ids = False
+
+    @api.depends("available_destination_payment_method_line_ids")
+    def _compute_destination_payment_method_line_id(self):
+        for pay in self:
+            available_lines = pay.available_destination_payment_method_line_ids
+            # an explicit choice is kept as long as it is still available on the destination journal
+            if pay.destination_payment_method_line_id in available_lines:
+                continue
+            pay.destination_payment_method_line_id = available_lines[:1]
+
+    @api.constrains("destination_payment_method_line_id", "destination_journal_id")
+    def _check_destination_payment_method_line_id(self):
+        for pay in self.filtered("destination_payment_method_line_id"):
+            if pay.destination_payment_method_line_id not in pay.available_destination_payment_method_line_ids:
+                raise ValidationError(
+                    _(
+                        "The destination payment method %(method)s is not available on the destination journal %(journal)s.",
+                        method=pay.destination_payment_method_line_id.display_name,
+                        journal=pay.destination_journal_id.display_name,
+                    )
+                )
+
+    # TO DO: Check in v19+ if odoo delete the paired_internal_transfer_payment_id field, restore the field in this module
+    # paired_internal_transfer_payment_id = fields.Many2one('account.payment',
+    #     index='btree_not_null',
+    #     help="When an internal transfer is posted, a paired payment is created. "
+    #     "They are cross referenced through this field", copy=False)
+
+    def _get_name_receipt_report(self, report_xml_id):
+        """Method similar to the '_get_name_invoice_report' of l10n_latam_invoice_document
+        Basically it allows different localizations to define it's own report
+        This method should actually go in a sale_ux module that later can be extended by different localizations
+        Another option would be to use report_substitute module and setup a subsitution with a domain
+        """
+        self.ensure_one()
+        if self.is_internal_transfer:
+            return "account_internal_transfer.report_account_transfer"
+        return report_xml_id
+
+    def _get_aml_default_display_name_list(self):
+        values = super()._get_aml_default_display_name_list()
+        values = [
+            (
+                key,
+                _("Internal Transfer") if self.is_internal_transfer and key == "label" else value,
+            )
+            for key, value in values
+        ]
+        return values
+
+    def _get_liquidity_aml_display_name_list(self):
+        res = super()._get_liquidity_aml_display_name_list()
+        if self.is_internal_transfer:
+            if self.payment_type == "inbound":
+                return [("transfer_to", _("Transfer to %s", self.journal_id.name))]
+            else:  # payment.payment_type == 'outbound':
+                return [("transfer_from", _("Transfer from %s", self.journal_id.name))]
+        return res
+
+    @api.depends("destination_journal_id", "is_internal_transfer")
+    def _compute_available_partner_bank_ids(self):
+        super()._compute_available_partner_bank_ids()
+        for pay in self:
+            if pay.is_internal_transfer:
+                pay.available_partner_bank_ids = pay.destination_journal_id.bank_account_id
+
+    @api.depends("is_internal_transfer", "destination_journal_id")
+    def _compute_destination_account_id(self):
+        super()._compute_destination_account_id()
+        for pay in self:
+            if pay.is_internal_transfer:
+                pay.destination_account_id = pay.destination_journal_id.company_id.transfer_account_id
+
+    @api.model
+    def _get_trigger_fields_to_synchronize(self):
+        res = super()._get_trigger_fields_to_synchronize()
+        return res + ("is_internal_transfer",)
+
+    def _prepare_paired_payment_values(self):
+        """Valores para crear el paired payment de una transferencia interna.
+        Hookable: account_payment_pro lo extiende para convertir el amount entre monedas.
+        """
+        self.ensure_one()
+        paired_payment_type = self._get_paired_payment_type()
+        paired_method_line = (
+            self.destination_payment_method_line_id
+            or self.destination_journal_id._get_available_payment_method_lines(paired_payment_type)[:1]
+        )
+        return {
+            "journal_id": self.destination_journal_id.id,
+            "currency_id": (self.destination_journal_id.currency_id or self.company_currency_id).id,
+            "company_id": self.destination_company_id.id,
+            "destination_company_id": self.company_id.id,
+            "destination_journal_id": self.journal_id.id,
+            "payment_type": paired_payment_type,
+            "payment_method_line_id": paired_method_line.id,
+            # copy() carries the origin account when the field is editable (l10n_account_withholding_tax)
+            "outstanding_account_id": paired_method_line.payment_account_id.id,
+            "move_id": None,
+            "memo": self.memo,
+            "paired_internal_transfer_payment_id": self.id,
+            "date": self.date,
+        }
+
+    def _create_paired_internal_transfer_payment(self):
+        """When an internal transfer is posted, a paired payment is created
+        with opposite payment_type and swapped journal_id & destination_journal_id.
+        Both payments liquidity transfer lines are then reconciled.
+        """
+        if self.filtered(lambda x: x.move_id.state == "draft"):
+            raise UserError(
+                _(
+                    "We couldn't create the paired payment because the journal entry of the original payment is in draft state."
+                )
+            )
+        for payment in self:
+            # the line chosen by the user wins over the journal default and over the context hook
+            paired_payment = payment.copy(payment._prepare_paired_payment_values())
+            destination_line = payment.destination_payment_method_line_id
+            if not destination_line:
+                # The payment method line ID in 'paired_payment' needs to be computed manually,
+                # as it does not compute automatically.
+                # This ensures not to use the same payment method line ID of the original transfer payment.
+                paired_payment._compute_payment_method_line_id()
+
+            if (
+                not payment.payment_method_line_id.payment_account_id
+                or not paired_payment.payment_method_line_id.payment_account_id
+            ):
+                raise ValidationError(
+                    _("The origin or destination payment methods do not have an outstanding account.")
+                )
+            if not destination_line and self.env.context.get("default_payment_method_line_id"):
+                paired_payment.payment_method_line_id = self.env.context.get("default_payment_method_line_id")
+            paired_payment.filtered(lambda p: not p.move_id)._generate_journal_entry(
+                # Force the exact ARS balance from the original transfer line to avoid
+                # rounding discrepancies when both journals are in different foreign currencies
+                # (e.g. USD → EUR), which would prevent full reconciliation of the bridge lines.
+                force_balance=abs(
+                    sum(
+                        payment.move_id.line_ids.filtered(
+                            lambda l: l.account_id == payment.destination_account_id
+                        ).mapped("balance")
+                    )
+                )
+            )
+            paired_payment.move_id._post(soft=False)
+            payment.paired_internal_transfer_payment_id = paired_payment
+            body = _("This payment has been created from:") + payment._get_html_link()
+            paired_payment.message_post(body=body)
+            body = _("A second payment has been created:") + paired_payment._get_html_link()
+            payment.message_post(body=body)
+            payment._reconcile_paired_transfer_lines()
+
+    def _reconcile_paired_transfer_lines(self):
+        """Reconcile the transfer account lines of each payment with the ones of its paired payment.
+
+        Resetting a leg to draft unreconciles those lines, so this runs on every confirmation and
+        not only when the pair is created. Nothing happens while the other leg is not posted: the
+        last leg confirmed reconciles the pair.
+        """
+        for payment in self:
+            paired_payment = payment.paired_internal_transfer_payment_id
+            # Both legs may be posted in the same batch: the first one posted finds the other
+            # still in draft and skips, the second one reconciles the pair.
+            if payment.move_id.state != "posted" or paired_payment.move_id.state != "posted":
+                continue
+            lines = (payment.move_id.line_ids + paired_payment.move_id.line_ids).filtered(
+                lambda l: (l.account_id == payment.destination_account_id and not l.reconciled)
+            )
+            # A single open line has no counterpart here: the other one was reconciled by hand
+            # with something else while this leg was in draft, and reconcile() would run for nothing.
+            if len(lines) > 1:
+                lines.reconcile()
+
+    def action_post(self):
+        # Draft is synced to the paired payment (see action_draft), so posting has to be synced too
+        paired_to_post = self.env["account.payment"]
+        if not self.env.context.get("skip_paired_sync"):
+            paired_to_post = (
+                self.filtered(
+                    lambda p: (
+                        p.is_internal_transfer
+                        and p.paired_internal_transfer_payment_id
+                        and p.paired_internal_transfer_payment_id.state == "draft"
+                    )
+                ).mapped("paired_internal_transfer_payment_id")
+                - self
+            )
+        # A transfer already posted before and without a pair comes from older data, where the destination
+        # entry has no payment of its own: creating the pair now would register that entry twice.
+        unpaired_reposted = self.filtered(
+            lambda pay: (
+                pay.is_internal_transfer and not pay.paired_internal_transfer_payment_id and pay.move_id.posted_before
+            )
+        )
+        super().action_post()
+        if paired_to_post:
+            paired_to_post.with_context(skip_paired_sync=True).action_post()
+        transfers = self.filtered("is_internal_transfer")
+        (transfers - unpaired_reposted).filtered(
+            lambda pay: not pay.paired_internal_transfer_payment_id
+        )._create_paired_internal_transfer_payment()
+        # A leg reset to draft and confirmed again already has its pair: only the reconciliation
+        # of the transfer lines is missing, since the reset to draft removed it.
+        transfers.filtered("paired_internal_transfer_payment_id")._reconcile_paired_transfer_lines()
+
+    def action_open_destination_journal(self):
+        """Redirect the user to this destination journal.
+        :return:    An action on account.move.
+        """
+        self.ensure_one()
+
+        action = {
+            "name": _("Destination journal"),
+            "type": "ir.actions.act_window",
+            "res_model": "account.journal",
+            "context": {"create": False},
+            "view_mode": "form",
+            "target": "new",
+            "res_id": self.destination_journal_id.id,
+        }
+        return action
+
+    @api.depends("is_internal_transfer")
+    def _compute_partner_id(self):
+        super()._compute_partner_id()
+        for pay in self.filtered("is_internal_transfer"):
+            pay.partner_id = False
+
+    def _prepare_move_line_default_vals(self, write_off_line_vals=None, force_balance=None):
+        line_vals_list = super()._prepare_move_line_default_vals(
+            write_off_line_vals=write_off_line_vals, force_balance=force_balance
+        )
+
+        if (
+            # This is to avoid dependency on payment_pro
+            "amount_company_currency" in self._fields
+            and self.is_internal_transfer
+            # Payment journal is in company currency (either not set or explicitly set to company currency)
+            and (not self.journal_id.currency_id or self.journal_id.currency_id == self.company_id.currency_id)
+            and self.destination_journal_id.currency_id  # Destination journal has a different currency
+            and self.destination_journal_id.currency_id != self.company_id.currency_id
+        ):
+            for line_vals in line_vals_list:
+                if "amount_currency" in line_vals:
+                    # Set the currency to the company's currency
+                    line_vals["currency_id"] = self.company_id.currency_id.id
+                    # Adjust the amount_currency based on the balance
+                    if line_vals["balance"] > 0:
+                        line_vals["amount_currency"] = self.amount_company_currency
+                    elif line_vals["balance"] < 0:
+                        line_vals["amount_currency"] = -self.amount_company_currency
+                    else:
+                        # When balance is zero, ensure amount_currency is neutral
+                        line_vals["amount_currency"] = 0.0
+        return line_vals_list
+
+    def write(self, vals):
+        res = super().write(vals)
+        # Avoid recursion when updating paired payments
+        if self.env.context.get("skip_paired_payment_update"):
+            return res
+
+        # Update paired payment when amount, rate or journal changes
+        for payment in self.filtered(lambda p: p.is_internal_transfer and p.paired_internal_transfer_payment_id):
+            paired_payment = payment.paired_internal_transfer_payment_id
+            updates = {}
+
+            # Sync amounts: use counterpart_currency_amount for proper cross-currency conversion
+            amount_fields_changed = any(
+                f in vals
+                for f in [
+                    "amount",
+                    "counterpart_currency_amount",
+                    "user_accounting_rate",
+                    "user_counterpart_rate",
+                    "accounting_rate",
+                    "counterpart_rate",
+                ]
+            )
+
+            use_payment_pro = getattr(payment.company_id, "use_payment_pro", False)
+            if amount_fields_changed and use_payment_pro:
+                counterpart_amount = getattr(payment, "counterpart_currency_amount", False)
+                if counterpart_amount:
+                    # Sin redondear: counterpart_currency_amount ya viene redondeado y
+                    # le quitaría precisión a amount_exact del paired (drift 99.994,50).
+                    origin_rate = getattr(payment, "counterpart_rate", 0.0)
+                    origin_exact = getattr(payment, "amount_exact", 0.0) or payment.amount
+                    precise_amount = abs(origin_exact * origin_rate) if origin_rate else abs(counterpart_amount)
+                    if paired_payment.currency_id.round(precise_amount) != paired_payment.amount:
+                        updates["amount"] = paired_payment.currency_id.round(precise_amount)
+                        updates["amount_exact"] = precise_amount
+            elif "amount" in vals:
+                if payment.amount != paired_payment.amount:
+                    updates["amount"] = payment.amount
+
+            # Sync rates: invert counterpart_rate because paired payment has swapped currencies
+            rate_fields_changed = any(
+                f in vals
+                for f in ["user_accounting_rate", "user_counterpart_rate", "accounting_rate", "counterpart_rate"]
+            )
+            counterpart_rate = getattr(payment, "counterpart_rate", False)
+            if rate_fields_changed and use_payment_pro and counterpart_rate:
+                inverse_rate = 1.0 / counterpart_rate
+                current_paired_rate = getattr(paired_payment, "counterpart_rate", 0)
+                # Use float_compare with 6 decimal precision to avoid floating-point comparison issues
+                if float_compare(inverse_rate, current_paired_rate, precision_digits=6) != 0:
+                    updates["counterpart_rate"] = inverse_rate
+
+            # Sync journals (swapped relationship)
+            if "journal_id" in vals and payment.journal_id != paired_payment.destination_journal_id:
+                updates["destination_journal_id"] = payment.journal_id.id
+
+            if "destination_journal_id" in vals and payment.destination_journal_id != paired_payment.journal_id:
+                updates["journal_id"] = payment.destination_journal_id.id
+
+            # Apply updates to paired payment
+            if updates:
+                paired_payment.with_context(skip_paired_payment_update=True).write(updates)
+
+        return res
+
+    def action_open_paired_payment(self):
+        """Navigate to the paired internal transfer payment."""
+        self.ensure_one()
+        if not self.paired_internal_transfer_payment_id:
+            return
+
+        return {
+            "name": _("Paired Payment"),
+            "type": "ir.actions.act_window",
+            "res_model": "account.payment",
+            "view_mode": "form",
+            "res_id": self.paired_internal_transfer_payment_id.id,
+            "target": "current",
+        }
+
+    def action_draft(self):
+        res = super().action_draft()
+        if self.env.context.get("skip_paired_sync"):
+            return res
+        paired = self.filtered(
+            lambda p: (
+                p.is_internal_transfer
+                and p.paired_internal_transfer_payment_id
+                and p.paired_internal_transfer_payment_id.state != "draft"
+            )
+        ).mapped("paired_internal_transfer_payment_id")
+        if paired:
+            paired.with_context(skip_paired_sync=True).action_draft()
+        return res
+
+    def action_cancel(self):
+        res = super().action_cancel()
+        if self.env.context.get("skip_paired_sync"):
+            return res
+        paired = self.filtered(
+            lambda p: (
+                p.is_internal_transfer
+                and p.paired_internal_transfer_payment_id
+                and p.paired_internal_transfer_payment_id.state != "canceled"
+            )
+        ).mapped("paired_internal_transfer_payment_id")
+        if paired:
+            paired.with_context(skip_paired_sync=True).action_cancel()
+        return res

@@ -1,0 +1,74 @@
+# Automatic Argentinian Withholdings on Payments (l10n_ar_tax)
+
+Implements automatic calculation of Argentine withholdings (retenciones) and perceptions on payments. Withholdings are computed based on fiscal positions, tax configurations, jurisdictional rules, and partner-specific tax identification. Fully supports **multi-currency payments** — withholdings are always calculated and stored in ARS (company currency) regardless of the payment or debt currency.
+
+## Features
+
+- Automatic withholding calculation based on jurisdictions and tax tables.
+- Support for perception taxes.
+- Multi-currency withholdings: payments in USD, EUR, or any foreign currency produce correct ARS-denominated withholdings.
+- Configurable tax ratios for specific jurisdictions (e.g. Córdoba).
+- Fiscal position-based tax automation.
+- Withholding certificate generation.
+- Integration with ARCA web services.
+- ARBA, Santa Fe (PARP) and AGIP (CABA) padron readers.
+- Santa Fe withholding base per taxpayer regime: Multilateral Agreement withholds on the total.
+- Same-period base accumulation for taxes like Ganancias with minimum thresholds.
+- Integration with `account_payment_pro` tri-currency model.
+
+## Dependencies
+
+| Module | Purpose |
+|--------|---------|
+| `l10n_ar` | Argentine localization (auto-install trigger) |
+| `l10n_ar_ux` | Argentine UX extensions |
+| `l10n_ar_withholding` | Base withholding framework |
+| `account_payment_pro` | Tri-currency payment model (provides `destination_currency_id`, `accounting_rate`, `counterpart_rate`) |
+| `l10n_latam_check` | Check support for payment receipts |
+
+## Configuration
+
+1. **Taxes:** Accounting → Configuration → Taxes — configure withholding and perception taxes.
+2. **Fiscal positions:** Accounting → Configuration → Fiscal Positions — set up automatic tax assignment. In a multi-company setup with branches, a fiscal position of a branch can use the tax groups and taxes of its parent company (same behaviour as standard Odoo account mapping), so the chart of taxes only needs to be configured once on the parent.
+3. **Partner tax ID:** in Contacts, configure CUIT/CUIL/DNI.
+4. **Tax ratios:** set ratios (1–100) on percentage-based taxes to control the taxable base percentage.
+5. **Padron files:** for Santa Fe (PARP), ARBA and AGIP (CABA) the padron file is uploaded in Accounting → Configuration → Padron Alicuotas. The aliquot is read from the uploaded file on demand (AGIP accepts the `.rar` published by AGIP, or a `.zip`; reading `.rar` requires the `unrar` python library). See `doc/padron_santa_fe/` for specs and examples.
+
+### How the aliquot is resolved
+
+The same order applies to every jurisdiction, so a padron file always works as the contingency for a failing web service:
+
+1. **Aliquot loaded on the contact** (Contacts → Accounting) for the period: it wins over everything else.
+2. **Padron file** uploaded for that jurisdiction and period: it wins over the web service, even when the fiscal position line is set to query one.
+3. **Web service** of the jurisdiction (ARBA, Rentas Córdoba, AGIP). Setting the line to *Archivo de padrón* means this jurisdiction never queries a web service: with no padron uploaded the user is asked to upload it instead.
+
+### Withholding base in Santa Fe
+
+The PARP padron reports the taxpayer regime, and in Santa Fe that regime sets the base of the withholding (art. 380, RG 36/2026 of API Santa Fe):
+
+- **Local (`D`):** net base, without VAT. It is the base the Santa Fe withholding taxes are already configured with, so the configured tax is used as is.
+- **Multilateral Agreement (`C`):** the total amount, with no deduction. If no tax on the total exists for that aliquot, one is created from the configured tax, with the same aliquot and a `CM` suffix in its name.
+
+Taxes with the `CM` suffix belong to this flow and are not offered in the default tax selector of the fiscal position line: choosing one by hand would apply the total base to every taxpayer, local ones included. A tax on the total configured on purpose (a supplier that does not itemize VAT) stays selectable and is never overwritten by the padron.
+
+Perceptions follow the same regime (art. 387): a local (`D`) is perceived on the net base, a Multilateral Agreement taxpayer (`C`) on 50% of it. For the latter, a tax with a 50% *Ratio* is created from the configured one, with the same aliquot and a `CM` suffix in its name. The *Ratio* of a sale tax only applies to Santa Fe perceptions.
+
+## Usage
+
+- Withholdings are automatically calculated when creating payments based on the partner's fiscal position.
+- Perception taxes are applied via fiscal positions.
+- Withholding certificates can be generated from the payment form.
+- Multi-currency: the user sees withholding amounts expressed in the debt currency (B) for UX, but stored amounts and bases are always in ARS.
+
+## Bug Tracker
+
+Bugs are tracked on [GitHub Issues](https://github.com/ingadhoc/odoo-argentina/issues).
+
+## Credits
+
+**Author:** ADHOC SA · [www.adhoc.com.ar](https://www.adhoc.com.ar)
+**License:** AGPL-3.0 or later
+
+---
+
+See [DESIGN.md](DESIGN.md) for internal architecture and design decisions.
