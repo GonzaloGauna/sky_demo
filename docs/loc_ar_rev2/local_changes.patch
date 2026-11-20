@@ -1,0 +1,130 @@
+diff -ruN -x __pycache__ upstream/account_payment_pro/migrations/19.0.3.4.0/pre-migrate.py account_payment_pro/migrations/19.0.3.4.0/pre-migrate.py
+--- upstream/account_payment_pro/migrations/19.0.3.4.0/pre-migrate.py	1970-01-01 00:00:00.000000000 +0000
++++ account_payment_pro/migrations/19.0.3.4.0/pre-migrate.py	2026-11-20 19:12:52.788104732 +0000
+@@ -0,0 +1,38 @@
++"""Pre-migración propia (Avanx, loc_ar_rev2) de account_payment_pro 19.0.3.3.0 → 19.0.3.4.0.
++
++La 3.4.0 elimina el campo `account.payment.reconcile_on_company_currency`, pero la vista heredada
++`latam_check_view_account_payment_form_inherited` que queda en la BD (versión 3.3.0) todavía lo usa. Al
++actualizar, Odoo valida la vista principal del mismo archivo XML antes de reescribir la heredada y la
++actualización falla con «El campo "reconcile_on_company_currency" no existe en el modelo "account.payment"».
++
++ADHOC no incluye migración para esto. Se quitan del arch guardado las dos referencias (el <field> invisible y
++el dominio condicional); a continuación la carga del XML reescribe la vista con la versión 3.4.0.
++"""
++
++import json
++import logging
++import re
++
++_logger = logging.getLogger(__name__)
++
++_FIELD_RE = re.compile(r'\s*<field name="reconcile_on_company_currency"[^>]*/>')
++_DOMAIN_RE = re.compile(r'\s*domain="[^"]*if reconcile_on_company_currency else \[\]"')
++
++
++def migrate(cr, version):
++    cr.execute(
++        """
++        SELECT v.id, v.arch_db
++          FROM ir_ui_view v
++          JOIN ir_model_data d ON d.model = 'ir.ui.view' AND d.res_id = v.id
++         WHERE d.module = 'account_payment_pro'
++           AND d.name = 'latam_check_view_account_payment_form_inherited'
++        """
++    )
++    for view_id, arch in cr.fetchall():
++        if not arch:
++            continue
++        cleaned = {lang: _DOMAIN_RE.sub("", _FIELD_RE.sub("", value)) for lang, value in arch.items()}
++        if cleaned != arch:
++            cr.execute("UPDATE ir_ui_view SET arch_db = %s WHERE id = %s", (json.dumps(cleaned), view_id))
++            _logger.info("account_payment_pro: quitadas referencias a reconcile_on_company_currency de la vista %s", view_id)
+diff -ruN -x __pycache__ upstream/account_payment_pro/models/account_payment.py account_payment_pro/models/account_payment.py
+--- upstream/account_payment_pro/models/account_payment.py	2026-11-20 17:37:58.032671779 +0000
++++ account_payment_pro/models/account_payment.py	2026-11-20 19:10:00.294017816 +0000
+@@ -621,9 +621,9 @@
+     # agreamos depends de company para que re calcule los diarios disponibles
+     @api.depends("company_id")
+     def _compute_available_journal_ids(self):
+-        if self.company_id:
+-            self = self.with_company(self.company_id.id)
+-        super(AccountPayment, self)._compute_available_journal_ids()
++        for company, payments in self.grouped("company_id").items():
++            scoped = payments.with_company(company) if company else payments
++            super(AccountPayment, scoped)._compute_available_journal_ids()
+
+     @api.depends("amount", "amount_exact", "counterpart_rate", "counterpart_currency_id", "currency_id")
+     def _compute_counterpart_currency_amount(self):
+diff -ruN -x __pycache__ upstream/account_payment_pro/tests/test_account_paymet_pro_unit_test.py account_payment_pro/tests/test_account_paymet_pro_unit_test.py
+--- upstream/account_payment_pro/tests/test_account_paymet_pro_unit_test.py	2026-11-20 17:37:58.033828279 +0000
++++ account_payment_pro/tests/test_account_paymet_pro_unit_test.py	2026-11-20 19:10:00.298951916 +0000
+@@ -1,11 +1,12 @@
+ from datetime import timedelta
+
+ from odoo import Command, fields
+-from odoo.tests import common, tagged
++from odoo.tests import tagged
++from odoo.addons.account.tests.common import AccountTestInvoicingCommon
+
+
+ @tagged("post_install", "-at_install")
+-class TestAccountPaymentProUnitTest(common.TransactionCase):
++class TestAccountPaymentProUnitTest(AccountTestInvoicingCommon):
+     @classmethod
+     def setUpClass(cls):
+         super(TestAccountPaymentProUnitTest, cls).setUpClass()
+@@ -64,7 +65,7 @@
+                 "invoice_line_ids": [
+                     Command.create(
+                         {
+-                            "product_id": self.env.ref("product.product_product_16").id,
++                            "product_id": self.product_a.id,
+                             "quantity": 1,
+                             "price_unit": 100,
+                         }
+@@ -132,7 +133,7 @@
+                 "invoice_line_ids": [
+                     Command.create(
+                         {
+-                            "product_id": self.env.ref("product.product_product_16").id,
++                            "product_id": self.product_a.id,
+                             "quantity": 1,
+                             "price_unit": 100,
+                         }
+@@ -213,7 +214,7 @@
+                 "invoice_line_ids": [
+                     Command.create(
+                         {
+-                            "product_id": self.env.ref("product.product_product_16").id,
++                            "product_id": self.product_a.id,
+                             "quantity": 1,
+                             "price_unit": 500,
+                         }
+@@ -268,7 +269,7 @@
+                 "invoice_line_ids": [
+                     Command.create(
+                         {
+-                            "product_id": self.env.ref("product.product_product_16").id,
++                            "product_id": self.product_a.id,
+                             "quantity": 1,
+                             "price_unit": 300,
+                         }
+@@ -325,7 +326,7 @@
+                 "invoice_line_ids": [
+                     Command.create(
+                         {
+-                            "product_id": self.env.ref("product.product_product_16").id,
++                            "product_id": self.product_a.id,
+                             "quantity": 1,
+                             "price_unit": 1000,
+                         }
+@@ -377,7 +378,7 @@
+                 "company_id": self.company.id,
+             }
+         )
+-        product = self.env.ref("product.product_product_16")
++        product = self.product_a
+         product.with_company(branch).write({"taxes_id": [Command.set(parent_tax.ids)]})
+
+         payment = self.env["account.payment"].create(

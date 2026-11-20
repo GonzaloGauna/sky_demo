@@ -51,7 +51,7 @@ class TestSkyAccountMenu(TransactionCase):
             with self.subTest(menu=menu_xmlid):
                 menu = self.env.ref(menu_xmlid)
                 self.assertEqual(menu.parent_id, self.env.ref(parent_xmlid))
-                for lang in ("en_US", "es_AR"):
+                for lang, _lang_name in self.env["res.lang"].get_installed():
                     self.assertEqual(menu.with_context(lang=lang).name, name, lang)
 
     def test_bank_and_cash_order(self):

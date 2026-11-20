@@ -174,5 +174,14 @@
     "repository": "OCA/bank-statement-import",
     "branch": "19.0",
     "commit": "058a9a885d775040d89488525f24921389164400"
+  },
+  {
+    "module": "account_payment_pro",
+    "version": "19.0.3.4.0",
+    "license": "AGPL-3",
+    "repository": "ingadhoc/account-payment",
+    "branch": "19.0",
+    "commit": "0603a5fe7cdb8356560818312a366fb3b59dab61",
+    "local_changes": "docs/loc_ar_rev2/local_changes.patch: _compute_available_journal_ids por empresa (de argentina19), test con AccountTestInvoicingCommon, pre-migración 19.0.3.4.0 de la vista latam_check"
   }
 ]
