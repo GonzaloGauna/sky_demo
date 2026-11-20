@@ -1,4 +1,8 @@
+import ast
+
 from odoo.tests import TransactionCase, tagged
+
+from ..models.ir_ui_menu import MENU_NAMES
 
 # (xml id del menú, xml id del padre esperado, nombre esperado)
 EXPECTED = [
@@ -71,10 +75,15 @@ class TestSkyAccountMenu(TransactionCase):
     def test_withholding_tax_action(self):
         """«Impuestos de retención» solo devuelve impuestos de retención."""
         action = self.env.ref("sky_account_menu.action_withholding_tax")
-        domain = eval(action.domain)  # noqa: S307 - dominio estático del propio módulo
+        domain = ast.literal_eval(action.domain)
         taxes = self.env["account.tax"].with_context(active_test=False).search(domain)
         self.assertTrue(all(taxes.mapped("l10n_ar_withholding_payment_type")))
         others = self.env["account.tax"].with_context(active_test=False).search(
             [("l10n_ar_withholding_payment_type", "=", False)], limit=1
         )
         self.assertNotIn(others, taxes)
+
+    def test_menu_names_single_source(self):
+        """Todo menú ajeno renombrado está en MENU_NAMES (única fuente) y con el nombre de la spec."""
+        foreign = {x: name for x, _parent, name in EXPECTED if not x.startswith("sky_account_menu.")}
+        self.assertEqual(MENU_NAMES, foreign)

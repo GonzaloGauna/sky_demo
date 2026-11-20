@@ -14,8 +14,8 @@ assert company and company.chart_template == "ar_ri", "Revisar empresa CLUB y pl
 names = json.loads((Path(get_module_path("sky_account_menu")).parent / "docs/loc_ar_rev2/modules.json").read_text())
 missing = [name for name in names if not get_module_path(name)]
 assert not missing, "Faltan addons en addons_path: " + ", ".join(missing)
-Session = env["ir.module.module"].sudo().search([("name", "=", "cash_control"), ("state", "=", "installed")])
-if Session:
+cash_control_module = env["ir.module.module"].sudo().search([("name", "=", "cash_control"), ("state", "=", "installed")])
+if cash_control_module:
     open_sessions = env["pop.session"].sudo().search_count([])
     configs = env["pop.config"].sudo().search_count([])
     assert not open_sessions and not configs, (
