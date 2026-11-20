@@ -183,5 +183,23 @@
     "branch": "19.0",
     "commit": "0603a5fe7cdb8356560818312a366fb3b59dab61",
     "local_changes": "docs/loc_ar_rev2/local_changes.patch: _compute_available_journal_ids por empresa (de argentina19), test con AccountTestInvoicingCommon, pre-migración 19.0.3.4.0 de la vista latam_check"
+  },
+  {
+    "module": "account_ux",
+    "version": "19.0.1.33.0",
+    "license": "AGPL-3",
+    "repository": "ingadhoc/account-financial-tools",
+    "branch": "19.0",
+    "commit": "88d964fdd63bc614928b5aa7da1abaa712ac6990",
+    "local_changes": "docs/loc_ar_rev2/local_changes.patch: herencia en lugar de parches globales (de argentina19), sin hooks.py, test de aislamiento"
+  },
+  {
+    "module": "l10n_ar_tax",
+    "version": "19.0.1.39.0",
+    "license": "AGPL-3",
+    "repository": "ingadhoc/odoo-argentina",
+    "branch": "19.0",
+    "commit": "ed607195bb4d6979cff69b58547b5376fbfcb95a",
+    "local_changes": "docs/loc_ar_rev2/local_changes.patch: _synchronize_to_moves por herencia, posición fiscal manual al crear el pago agrupado (de argentina19), test de aislamiento"
   }
 ]

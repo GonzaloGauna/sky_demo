@@ -123,3 +123,41 @@ class TestPaymentWithholdingPostedRecompute(TestArWithholdingArRi):
 
         self.assertEqual(wth_line.base_amount, base_amount)
         self.assertEqual(wth_line.amount, amount)
+
+    def test_posted_payment_keeps_withholding_lines_on_fiscal_position_remap(self):
+        """Merging a branch into its parent re-maps the fiscal position of the payments by SQL and flags its
+        dependents: the withholding lines of a posted payment used to be cleared and recreated empty."""
+        invoice = self._create_invoice("1-130060")
+
+        payment = self._register_payment(invoice, invoice.amount_total)
+        wth_line = payment.l10n_ar_withholding_line_ids
+        self.assertTrue(wth_line.amount, "The payment must carry a withholding with amount.")
+        self.assertTrue(payment.l10n_ar_fiscal_position_id)
+        values = wth_line.read(["name", "tax_id", "base_amount", "amount"])
+
+        other_fiscal_pos = payment.l10n_ar_fiscal_position_id.copy({"name": "IIBB CABA (merged)"})
+        self.env.cr.execute(
+            "UPDATE account_payment SET l10n_ar_fiscal_position_id = %s WHERE id = %s",
+            (other_fiscal_pos.id, payment.id),
+        )
+        self.env.invalidate_all()
+        payment.modified(["l10n_ar_fiscal_position_id"])
+        self.env.flush_all()
+
+        self.assertTrue(wth_line.exists(), "The withholding line must not be recreated.")
+        self.assertEqual(payment.l10n_ar_withholding_line_ids, wth_line)
+        self.assertEqual(wth_line.read(["name", "tax_id", "base_amount", "amount"]), values)
+
+    def test_posted_payment_keeps_fiscal_position_on_recompute(self):
+        """Flagging a dependency of the fiscal position on a posted payment (e.g. a re-map by SQL plus modified)
+        used to clear it."""
+        invoice = self._create_invoice("1-130061")
+
+        payment = self._register_payment(invoice, invoice.amount_total)
+        fiscal_pos = payment.l10n_ar_fiscal_position_id
+        self.assertTrue(fiscal_pos)
+
+        payment.modified(["partner_id", "to_pay_move_line_ids", "payment_method_line_id"])
+        self.env.flush_all()
+
+        self.assertEqual(payment.l10n_ar_fiscal_position_id, fiscal_pos)

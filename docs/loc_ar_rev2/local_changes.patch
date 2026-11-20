@@ -53,7 +53,7 @@ diff -ruN -x __pycache__ upstream/account_payment_pro/models/account_payment.py 
 +        for company, payments in self.grouped("company_id").items():
 +            scoped = payments.with_company(company) if company else payments
 +            super(AccountPayment, scoped)._compute_available_journal_ids()
-
+ 
      @api.depends("amount", "amount_exact", "counterpart_rate", "counterpart_currency_id", "currency_id")
      def _compute_counterpart_currency_amount(self):
 diff -ruN -x __pycache__ upstream/account_payment_pro/tests/test_account_paymet_pro_unit_test.py account_payment_pro/tests/test_account_paymet_pro_unit_test.py
@@ -61,13 +61,13 @@ diff -ruN -x __pycache__ upstream/account_payment_pro/tests/test_account_paymet_
 +++ account_payment_pro/tests/test_account_paymet_pro_unit_test.py	2026-11-20 19:10:00.298951916 +0000
 @@ -1,11 +1,12 @@
  from datetime import timedelta
-
+ 
  from odoo import Command, fields
 -from odoo.tests import common, tagged
 +from odoo.tests import tagged
 +from odoo.addons.account.tests.common import AccountTestInvoicingCommon
-
-
+ 
+ 
  @tagged("post_install", "-at_install")
 -class TestAccountPaymentProUnitTest(common.TransactionCase):
 +class TestAccountPaymentProUnitTest(AccountTestInvoicingCommon):
@@ -126,5 +126,292 @@ diff -ruN -x __pycache__ upstream/account_payment_pro/tests/test_account_paymet_
 -        product = self.env.ref("product.product_product_16")
 +        product = self.product_a
          product.with_company(branch).write({"taxes_id": [Command.set(parent_tax.ids)]})
-
+ 
          payment = self.env["account.payment"].create(
+diff -ruN -x __pycache__ upstream/account_ux/__init__.py account_ux/__init__.py
+--- upstream/account_ux/__init__.py	2026-11-20 17:37:59.186839479 +0000
++++ account_ux/__init__.py	2026-11-20 19:41:52.363773394 +0000
+@@ -5,10 +5,6 @@
+ from . import reports
+ from . import models
+ from . import wizards
+-from .hooks import uninstall_hook
+-from odoo.fields import Domain
+-from odoo.addons.account.models.account_payment import AccountPayment
+-from odoo.addons.account.models.account_move import AccountMove
+ 
+ 
+ def _change_receipt_name(env):
+@@ -17,43 +13,3 @@
+         "(object.partner_type == 'supplier' and 'Orden de Pago' or 'Recibo') + ' ' + (object.name or 'Borrador')"
+     )
+ 
+-
+-def monkey_patches():
+-    def _compute_available_journal_ids_patch(self):
+-        """
+-        Volvemos a usar _check_company_domain que odoo lo abandonó en 19
+-        """
+-        journals = self.env["account.journal"].search(
+-            Domain(self.env["account.journal"]._check_company_domain(self.company_id))
+-            & Domain([("type", "in", ("bank", "cash", "credit"))])
+-        )
+-
+-        for pay in self:
+-            if pay.payment_type == "inbound":
+-                pay.available_journal_ids = journals.filtered("inbound_payment_method_line_ids")
+-            else:
+-                pay.available_journal_ids = journals.filtered("outbound_payment_method_line_ids")
+-
+-    def propagate(method1, method2):
+-        """Propagate decorators from ``method1`` to ``method2``, and return the
+-        resulting method.
+-        """
+-        if method1:
+-            for attr in ("_returns",):
+-                if hasattr(method1, attr) and not hasattr(method2, attr):
+-                    setattr(method2, attr, getattr(method1, attr))
+-        return method2
+-
+-    def _patch_method(cls, name, method):
+-        """Método para aplicar monkey patches.
+-        cls --> clase
+-        name --> nombre del método original
+-        method --> nombre del método que tiene el parche"""
+-
+-        origin = getattr(cls, name)
+-        method.origin = origin
+-        wrapped = propagate(origin, method)
+-        wrapped.origin = origin
+-        setattr(cls, name, wrapped)
+-
+-    _patch_method(AccountPayment, "_compute_available_journal_ids", _compute_available_journal_ids_patch)
+diff -ruN -x __pycache__ upstream/account_ux/__manifest__.py account_ux/__manifest__.py
+--- upstream/account_ux/__manifest__.py	2026-11-20 17:37:59.186839479 +0000
++++ account_ux/__manifest__.py	2026-11-20 19:41:52.363827894 +0000
+@@ -67,9 +67,7 @@
+     # lo hacemos auto install porque este repo no lo podemos agregar en otros
+     # por build de travis (ej sipreco) y queremos que para runbot se auto
+     # instale
+-    "auto_install": True,
++    "auto_install": False,
+     "application": False,
+     "post_init_hook": "_change_receipt_name",
+-    "post_load": "monkey_patches",
+-    "uninstall_hook": "uninstall_hook",
+ }
+diff -ruN -x __pycache__ upstream/account_ux/hooks.py account_ux/hooks.py
+--- upstream/account_ux/hooks.py	2026-11-20 17:37:59.187658179 +0000
++++ account_ux/hooks.py	1970-01-01 00:00:00.000000000 +0000
+@@ -1,13 +0,0 @@
+-from odoo.addons.account.models.account_move import AccountMove
+-from odoo.addons.account.models.account_payment import AccountPayment
+-
+-
+-def _revert_method(cls, name):
+-    """Revertir el método original llamado 'name'"""
+-    method = getattr(cls, name)
+-    setattr(cls, name, method.origin)
+-
+-
+-def uninstall_hook(env):
+-    _revert_method(AccountPayment, "_compute_available_journal_ids")
+-    _revert_method(AccountMove, "_compute_show_reset_to_draft_button")
+diff -ruN -x __pycache__ upstream/account_ux/models/account_payment.py account_ux/models/account_payment.py
+--- upstream/account_ux/models/account_payment.py	2026-11-20 17:37:59.190347279 +0000
++++ account_ux/models/account_payment.py	2026-11-20 19:41:52.373774594 +0000
+@@ -1,5 +1,6 @@
+ from odoo import _, api, models
+ from odoo.exceptions import UserError
++from odoo.fields import Domain
+ 
+ 
+ class AccountPayment(models.Model):
+@@ -32,7 +33,14 @@
+             raise UserError(_("You cannot delete this payment, you should set it back to draft first."))
+ 
+     def _compute_available_journal_ids(self):
+-        super()._compute_available_journal_ids()
++        # Registry-local equivalent of the upstream post_load patch.
++        for pay in self:
++            journals = self.env["account.journal"].search(
++                Domain(self.env["account.journal"]._check_company_domain(pay.company_id))
++                & Domain([("type", "in", ("bank", "cash", "credit"))])
++            )
++            method = "inbound_payment_method_line_ids" if pay.payment_type == "inbound" else "outbound_payment_method_line_ids"
++            pay.available_journal_ids = journals.filtered(method)
+         for pay in self:
+             if not pay.available_journal_ids:
+                 raise UserError(
+diff -ruN -x __pycache__ upstream/account_ux/tests/__init__.py account_ux/tests/__init__.py
+--- upstream/account_ux/tests/__init__.py	2026-11-20 17:37:59.192391479 +0000
++++ account_ux/tests/__init__.py	2026-11-20 19:41:52.379026094 +0000
+@@ -13,3 +13,4 @@
+ from . import test_currency_rounding
+ from . import test_copy_inactive_tax
+ from . import test_invoice_salesperson
++from . import test_sky_registry_isolation
+diff -ruN -x __pycache__ upstream/account_ux/tests/test_sky_registry_isolation.py account_ux/tests/test_sky_registry_isolation.py
+--- upstream/account_ux/tests/test_sky_registry_isolation.py	1970-01-01 00:00:00.000000000 +0000
++++ account_ux/tests/test_sky_registry_isolation.py	2026-11-20 19:41:52.382733294 +0000
+@@ -0,0 +1,30 @@
++# License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
++from odoo.addons.account.models.account_payment import AccountPayment as CorePayment
++from odoo.addons.account.tests.common import AccountTestInvoicingCommon
++from odoo.tests import tagged
++
++
++@tagged("post_install", "-at_install")
++class TestSkyRegistryIsolation(AccountTestInvoicingCommon):
++    def test_core_payment_class_is_not_patched(self):
++        self.assertEqual(
++            CorePayment._compute_available_journal_ids.__module__,
++            "odoo.addons.account.models.account_payment",
++        )
++
++    def test_journals_follow_each_payment_company_in_a_batch(self):
++        other = self.setup_other_company(name="Sky separate legal entity")
++        first_company = self.company_data["company"]
++        second_company = other["company"]
++        payments_model = self.env["account.payment"].with_context(
++            allowed_company_ids=[first_company.id, second_company.id]
++        )
++        first = payments_model.new({"company_id": first_company.id, "payment_type": "inbound"})
++        second = payments_model.new({"company_id": second_company.id, "payment_type": "outbound"})
++        (first | second)._compute_available_journal_ids()
++        self.assertTrue(first.available_journal_ids)
++        self.assertTrue(second.available_journal_ids)
++        self.assertIn(self.company_data["default_journal_bank"], first.available_journal_ids._origin)
++        self.assertIn(other["default_journal_bank"], second.available_journal_ids._origin)
++        self.assertNotIn(other["default_journal_bank"], first.available_journal_ids._origin)
++        self.assertNotIn(self.company_data["default_journal_bank"], second.available_journal_ids._origin)
+diff -ruN -x __pycache__ upstream/l10n_ar_tax/README.rst l10n_ar_tax/README.rst
+--- upstream/l10n_ar_tax/README.rst	1970-01-01 00:00:00.000000000 +0000
++++ l10n_ar_tax/README.rst	2026-11-20 19:37:22.845889702 +0000
+@@ -0,0 +1,15 @@
++Retenciones argentinas en pagos
++========================================
++
++Extiende las retenciones nativas de Odoo 19 con posiciones fiscales,
++regímenes, jurisdicciones y alícuotas por contribuyente.
++
++Incluye el cálculo del importe neto del pago, certificados de retención
++y soporte para pagos en moneda extranjera mediante account_payment_pro.
++
++Configurar los impuestos y posiciones fiscales correspondientes antes
++de registrar pagos. La instalación del módulo no sustituye esa configuración.
++
++La documentación técnica completa del proyecto original se conserva en
++README.md. Código original de ADHOC SA y Odoo Community Association,
++con adaptaciones para sky_demo. Licencia AGPL-3.0.
+diff -ruN -x __pycache__ upstream/l10n_ar_tax/__init__.py l10n_ar_tax/__init__.py
+--- upstream/l10n_ar_tax/__init__.py	2026-11-20 17:38:00.315403980 +0000
++++ l10n_ar_tax/__init__.py	2026-11-20 19:37:22.845950902 +0000
+@@ -5,22 +5,11 @@
+ from . import models
+ from . import wizard
+ from . import demo
+-from odoo.addons.l10n_ar_withholding.models.account_payment import AccountPayment
+ import logging
+ 
+ _logger = logging.getLogger(__name__)
+ 
+ 
+-def monkey_patch_synchronize_to_moves():
+-    def _synchronize_to_moves(self, changed_fields):
+-        # Neutralize l10n_ar_withholding's _synchronize_to_moves override, which manually unlinks
+-        # the withholding lines on every sync ("synchronization mechanism is not implemented yet").
+-        # Since l10n_ar_tax now keeps withholding lines as display_type='product', the standard
+-        # sync handles them correctly, so we skip that manual-unlink override and call super directly.
+-        return super(AccountPayment, self)._synchronize_to_moves(changed_fields)
+-
+-    AccountPayment._synchronize_to_moves = _synchronize_to_moves
+-
+ 
+ def _l10n_ar_update_taxes(env):
+     """Al instalar este módulo, en caso de que existan compañías responsable inscripto argentinas y con plan de cuentas
+diff -ruN -x __pycache__ upstream/l10n_ar_tax/__manifest__.py l10n_ar_tax/__manifest__.py
+--- upstream/l10n_ar_tax/__manifest__.py	2026-11-20 17:38:00.315403980 +0000
++++ l10n_ar_tax/__manifest__.py	2026-11-20 19:37:22.846011302 +0000
+@@ -57,7 +57,6 @@
+         "l10n_latam_check",  # para reporte de pagos/recibos
+     ],
+     "installable": True,
+-    "auto_install": ["l10n_ar"],
+-    "post_load": "monkey_patch_synchronize_to_moves",
++    "auto_install": False,
+     "post_init_hook": "_l10n_ar_update_taxes",
+ }
+diff -ruN -x __pycache__ upstream/l10n_ar_tax/models/account_payment.py l10n_ar_tax/models/account_payment.py
+--- upstream/l10n_ar_tax/models/account_payment.py	2026-11-20 17:38:00.319930380 +0000
++++ l10n_ar_tax/models/account_payment.py	2026-11-20 19:37:22.865117102 +0000
+@@ -3,6 +3,7 @@
+ # directory
+ ##############################################################################
+ from odoo import Command, _, api, fields, models
++from odoo.addons.l10n_ar_withholding.models.account_payment import AccountPayment as WithholdingAccountPayment
+ from odoo.exceptions import UserError, ValidationError
+ from odoo.tools.sql import column_exists, create_column
+ 
+@@ -10,6 +11,12 @@
+ class AccountPayment(models.Model):
+     _inherit = "account.payment"
+ 
++    def _synchronize_to_moves(self, changed_fields):
++        # This module manages withholding lines itself. Skip only the standard
++        # withholding implementation, which removes them during synchronization.
++        # Match upstream behavior without modifying another class at process scope.
++        return super(WithholdingAccountPayment, self)._synchronize_to_moves(changed_fields)
++
+     l10n_ar_withholding_line_ids = fields.One2many(
+         "l10n_ar.payment.withholding",
+         "payment_id",
+diff -ruN -x __pycache__ upstream/l10n_ar_tax/tests/__init__.py l10n_ar_tax/tests/__init__.py
+--- upstream/l10n_ar_tax/tests/__init__.py	2026-11-20 17:38:00.319930380 +0000
++++ l10n_ar_tax/tests/__init__.py	2026-11-20 19:37:22.870245602 +0000
+@@ -21,3 +21,4 @@
+ from . import test_withholding_certificates_mail
+ from . import test_payment_withholding_posted_recompute
+ from . import test_withholding_fiscal_position_branches
++from . import test_sky_registry_isolation
+diff -ruN -x __pycache__ upstream/l10n_ar_tax/tests/test_sky_registry_isolation.py l10n_ar_tax/tests/test_sky_registry_isolation.py
+--- upstream/l10n_ar_tax/tests/test_sky_registry_isolation.py	1970-01-01 00:00:00.000000000 +0000
++++ l10n_ar_tax/tests/test_sky_registry_isolation.py	2026-11-20 19:37:22.893845701 +0000
+@@ -0,0 +1,12 @@
++# License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
++from odoo.addons.l10n_ar_withholding.models.account_payment import AccountPayment as CoreWithholdingPayment
++from odoo.tests import TransactionCase, tagged
++
++
++@tagged("post_install", "-at_install")
++class TestSkyWithholdingRegistryIsolation(TransactionCase):
++    def test_standard_withholding_class_is_not_patched(self):
++        self.assertEqual(
++            CoreWithholdingPayment._synchronize_to_moves.__module__,
++            "odoo.addons.l10n_ar_withholding.models.account_payment",
++        )
+diff -ruN -x __pycache__ upstream/l10n_ar_tax/wizard/account_payment_register.py l10n_ar_tax/wizard/account_payment_register.py
+--- upstream/l10n_ar_tax/wizard/account_payment_register.py	2026-11-20 17:38:00.325677980 +0000
++++ l10n_ar_tax/wizard/account_payment_register.py	2026-11-20 19:37:22.902300101 +0000
+@@ -162,6 +162,12 @@
+         return payment_vals
+ 
+     def _init_payments(self, to_process, edit_mode=False):
++        # Set a manual fiscal position while the payment is still being created.
++        # Rewriting it after posting recomputes withholding lines on already
++        # reconciled debt, erasing the withholding from grouped supplier payments.
++        if self.is_payment_pro and self.fiscal_position_mode == "manual":
++            for vals in to_process:
++                vals["create_vals"]["l10n_ar_fiscal_position_id"] = self.l10n_ar_fiscal_position_id.id
+         if self.env.context.get("payment_pro_draft"):
+             for vals in to_process:
+                 for key in ("write_off_line_vals", "force_balance", "line_ids"):
+@@ -203,7 +209,7 @@
+ 
+     def _create_payments(self):
+         payments = super(AccountPaymentRegister, self.with_context(skip_to_pay_compute=True))._create_payments()
+-        if self.fiscal_position_mode == "manual" and self.l10n_ar_fiscal_position_id:
++        if not self.is_payment_pro and self.fiscal_position_mode == "manual" and self.l10n_ar_fiscal_position_id:
+             payments.l10n_ar_fiscal_position_id = self.l10n_ar_fiscal_position_id
+         return payments
+ 
