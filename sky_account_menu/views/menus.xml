@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Clientes / Proveedores -->
+    <record id="account.menu_action_account_payments_receivable" model="ir.ui.menu">
+        <field name="name">Recibos de clientes</field>
+    </record>
+    <record id="account.menu_action_account_payments_payable" model="ir.ui.menu">
+        <field name="name">Pagos a proveedores</field>
+    </record>
+
+    <!-- Banco y Caja: Cajas, Sesiones, Cheques de terceros, Cheques propios, Transferencias -->
+    <record id="account_cashbox.menu_pop_dashboard" model="ir.ui.menu">
+        <field name="name">Cajas</field>
+        <field name="sequence">10</field>
+    </record>
+    <menuitem id="menu_cashbox_sessions"
+              name="Sesiones"
+              parent="account_internal_transfer.menu_finance_bank_and_cash"
+              action="account_cashbox.account_cashbox_session_action"
+              groups="account.group_account_invoice"
+              sequence="20"/>
+    <record id="l10n_latam_check.menu_third_party_check" model="ir.ui.menu">
+        <field name="parent_id" ref="account_internal_transfer.menu_finance_bank_and_cash"/>
+        <field name="name">Cheques de terceros</field>
+        <field name="sequence">30</field>
+    </record>
+    <record id="l10n_latam_check.menu_own_check" model="ir.ui.menu">
+        <field name="parent_id" ref="account_internal_transfer.menu_finance_bank_and_cash"/>
+        <field name="name">Cheques propios</field>
+        <field name="sequence">40</field>
+    </record>
+    <record id="account_internal_transfer.menu_action_account_payments_transfer" model="ir.ui.menu">
+        <field name="sequence">50</field>
+    </record>
+
+    <!-- Contabilidad > Acciones -->
+    <menuitem id="menu_accounting_actions"
+              name="Acciones"
+              parent="account.menu_finance_entries"
+              sequence="65"/>
+    <record id="account_reconcile_oca.account_account_reconcile_menu" model="ir.ui.menu">
+        <field name="parent_id" ref="menu_accounting_actions"/>
+        <field name="name">Conciliar</field>
+        <field name="sequence">10</field>
+    </record>
+    <record id="account_statement_import_file.account_statement_import_menu" model="ir.ui.menu">
+        <field name="parent_id" ref="menu_accounting_actions"/>
+        <field name="name">Importar extracto</field>
+        <field name="sequence">20</field>
+    </record>
+
+    <!-- Informes -->
+    <record id="account.account_reports_management_menu" model="ir.ui.menu">
+        <field name="name">Administración</field>
+    </record>
+    <record id="account_invoice_line_report.menu_action_account_invoice_line_report" model="ir.ui.menu">
+        <field name="name">Análisis de líneas de factura</field>
+        <field name="sequence">5</field>
+    </record>
+    <record id="product_margin.menu_action_product_margin" model="ir.ui.menu">
+        <field name="name">Márgenes de producto</field>
+    </record>
+    <record id="l10n_ar_fiscal_ws_reports.menu_account_sale_vat_ledger" model="ir.ui.menu">
+        <field name="name">Libro IVA Ventas</field>
+        <field name="sequence">4</field>
+    </record>
+    <record id="l10n_ar_fiscal_ws_reports.menu_account_purchase_vat_ledger" model="ir.ui.menu">
+        <field name="name">Libro IVA Compras</field>
+        <field name="sequence">6</field>
+    </record>
+
+    <!-- Configuración > Pagos -->
+    <menuitem id="menu_config_payments"
+              name="Pagos"
+              parent="account.menu_finance_configuration"
+              groups="account.group_account_manager"
+              sequence="27"/>
+    <menuitem id="menu_withholding_tax"
+              name="Impuestos de retención"
+              parent="menu_config_payments"
+              action="action_withholding_tax"
+              sequence="10"/>
+    <record id="account_payment_pro_receiptbook.menu_receiptbook_form" model="ir.ui.menu">
+        <field name="parent_id" ref="menu_config_payments"/>
+        <field name="name">Talonarios de recibos</field>
+        <field name="sequence">20</field>
+    </record>
+    <record id="account_cashbox.menu_account_cashbox" model="ir.ui.menu">
+        <field name="parent_id" ref="menu_config_payments"/>
+        <field name="name">Gestión de cajas</field>
+        <field name="sequence">30</field>
+    </record>
+
+    <!-- Configuración > ARCA -->
+    <record id="l10n_ar_withholding.menu_action_afip_earnings_table_scale_line" model="ir.ui.menu">
+        <field name="name">Alícuotas y montos Ganancias</field>
+    </record>
+
+    <!-- Replicar los nombres en todos los idiomas instalados (en cada instalación/actualización) -->
+    <function model="ir.ui.menu" name="_sky_apply_menu_names"/>
+</odoo>

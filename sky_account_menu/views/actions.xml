@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_withholding_tax" model="ir.actions.act_window">
+        <field name="name">Impuestos de retención</field>
+        <field name="res_model">account.tax</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('l10n_ar_withholding_payment_type', '!=', False)]</field>
+        <field name="context">{'default_type_tax_use': 'none', 'default_l10n_ar_withholding_payment_type': 'supplier', 'search_default_active': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Crear un impuesto de retención</p>
+            <p>Retenciones aplicadas en pagos a proveedores o sufridas en cobros de clientes.</p>
+        </field>
+    </record>
+</odoo>

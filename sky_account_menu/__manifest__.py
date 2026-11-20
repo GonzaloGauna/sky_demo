@@ -1,0 +1,26 @@
+{
+    "name": "Sky - Menús de Contabilidad",
+    "summary": "Reorganiza los menús de Facturación según la estructura pedida por el cliente",
+    "version": "19.0.1.0.0",
+    "category": "Accounting/Localizations",
+    "license": "LGPL-3",
+    "author": "Avanx",
+    "depends": [
+        "account_internal_transfer",
+        "account_cashbox",
+        "account_payment_pro_receiptbook",
+        "l10n_latam_check",
+        "l10n_ar_withholding",
+        "l10n_ar_fiscal_ws_reports",
+        "account_reconcile_oca",
+        "account_statement_import_file",
+        "product_margin",
+        "account_invoice_line_report",
+    ],
+    "data": [
+        "views/actions.xml",
+        "views/menus.xml",
+    ],
+    "installable": True,
+    "auto_install": False,
+}
