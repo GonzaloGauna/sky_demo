@@ -1,4 +1,4 @@
-{
+{  # noqa: B018
     "name": "Sky - Menús de Contabilidad",
     "summary": "Reorganiza los menús de Facturación según la estructura pedida por el cliente",
     "version": "19.0.1.0.0",

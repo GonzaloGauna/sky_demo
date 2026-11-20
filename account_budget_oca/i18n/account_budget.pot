@@ -206,4 +206,3 @@ msgstr ""
 #: selection:crossovered.budget,state:0
 msgid "Validated"
 msgstr ""
-

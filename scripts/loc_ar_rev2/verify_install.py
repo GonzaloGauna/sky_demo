@@ -1,3 +1,4 @@
+# ruff: noqa: F821  (script para odoo shell: `env` lo inyecta el shell)
 """Verifica la instalación y deja la copia autorizada en homologación y sin tareas de negocio."""
 import json
 from pathlib import Path

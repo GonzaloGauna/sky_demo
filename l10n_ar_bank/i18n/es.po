@@ -1,4 +1,4 @@
-# 
+#
 msgid ""
 msgstr ""
 "Language-Team: Spanish (https://app.transifex.com/adhoc/teams/46451/es/)\n"

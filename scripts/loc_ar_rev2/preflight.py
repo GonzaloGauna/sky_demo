@@ -1,3 +1,4 @@
+# ruff: noqa: F821  (script para odoo shell: `env` lo inyecta el shell)
 """Ejecutar con odoo shell. Valida la copia autorizada sin guardar cambios."""
 import json
 from pathlib import Path
