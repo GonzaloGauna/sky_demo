@@ -16,8 +16,16 @@ missing = [name for name in names if not get_module_path(name)]
 assert not missing, "Faltan addons en addons_path: " + ", ".join(missing)
 cash_control_module = env["ir.module.module"].sudo().search([("name", "=", "cash_control"), ("state", "=", "installed")])
 if cash_control_module:
-    open_sessions = env["pop.session"].sudo().search_count([])
-    configs = env["pop.config"].sudo().search_count([])
+    # Por SQL: tras el git pull el código de cash_control ya no existe y sus modelos no están en el registro.
+    counts = []
+    for table in ("pop_config", "pop_session"):
+        env.cr.execute("SELECT to_regclass(%s) IS NOT NULL", (table,))
+        if env.cr.fetchone()[0]:
+            env.cr.execute(f"SELECT count(*) FROM {table}")  # nombre fijo de la tupla anterior
+            counts.append(env.cr.fetchone()[0])
+        else:
+            counts.append(0)
+    configs, open_sessions = counts
     assert not open_sessions and not configs, (
         "cash_control tiene %s cajas y %s sesiones: revisar migración de datos antes de desinstalar" % (configs, open_sessions)
     )
