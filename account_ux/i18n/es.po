@@ -10,7 +10,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-09 13:18+0000\n"
+"POT-Creation-Date: 2026-11-04 12:15+0000\n"
 "PO-Revision-Date: 2026-04-13 22:41+0000\n"
 "Last-Translator: carla spiaggi <sca@adhoc.inc>\n"
 "Language-Team: Spanish <https://translation.dev-adhoc.com/projects/account-"
@@ -103,6 +103,11 @@ msgstr "Plantilla de plan contable"
 #: model:ir.model,name:account_ux.model_account_group
 msgid "Account Group"
 msgstr "Grupo de cuenta"
+
+#. module: account_ux
+#: model:ir.model,name:account_ux.model_account_move_reversal
+msgid "Account Move Reversal"
+msgstr ""
 
 #. module: account_ux
 #: model_terms:ir.ui.view,arch_db:account_ux.view_company_form
@@ -405,6 +410,7 @@ msgstr "Importe de Descuento"
 #: model:ir.model.fields,field_description:account_ux.field_account_journal__display_name
 #: model:ir.model.fields,field_description:account_ux.field_account_move__display_name
 #: model:ir.model.fields,field_description:account_ux.field_account_move_line__display_name
+#: model:ir.model.fields,field_description:account_ux.field_account_move_reversal__display_name
 #: model:ir.model.fields,field_description:account_ux.field_account_payment__display_name
 #: model:ir.model.fields,field_description:account_ux.field_account_payment_method_line__display_name
 #: model:ir.model.fields,field_description:account_ux.field_account_payment_register__display_name
@@ -499,6 +505,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:account_ux.field_account_journal__id
 #: model:ir.model.fields,field_description:account_ux.field_account_move__id
 #: model:ir.model.fields,field_description:account_ux.field_account_move_line__id
+#: model:ir.model.fields,field_description:account_ux.field_account_move_reversal__id
 #: model:ir.model.fields,field_description:account_ux.field_account_payment__id
 #: model:ir.model.fields,field_description:account_ux.field_account_payment_method_line__id
 #: model:ir.model.fields,field_description:account_ux.field_account_payment_register__id
@@ -1047,9 +1054,28 @@ msgid ""
 "you are standing in wins over one of its parent whatever the sequences say, "
 "and the sequence only decides between positions of the same company.\n"
 "\n"
-"This scope only narrows the automatic detection. A position stays selectable "
-"by hand and keeps working in the company that owns it."
+"This scope narrows the automatic detection. A position keeps working in the "
+"documents that already use it and in the company that owns it."
 msgstr ""
+"Sucursales en las que esta posición fiscal se detecta automáticamente.\n"
+"\n"
+"- Todas las sucursales: todas las compañías que dependen de esta, cualquiera "
+"sea su identificación fiscal.\n"
+"- Misma entidad legal: solo las sucursales que declaran la misma "
+"identificación fiscal que esta compañía, sin cortes en la cadena. Una "
+"compañía auxiliar sin identificación fiscal propia es otra entidad legal y "
+"queda excluida.\n"
+"- No compartida: solo esta compañía.\n"
+"\n"
+"Tenga cuidado con cómo elige la detección automática, porque no es por "
+"secuencia. Odoo ordena las candidatas primero por la profundidad de la "
+"compañía dueña en el árbol de sucursales y recién después por secuencia: una "
+"posición de la sucursal en la que está trabajando gana sobre una de su "
+"compañía matriz, sin importar las secuencias, y la secuencia solo decide "
+"entre posiciones de la misma compañía.\n"
+"\n"
+"Este alcance acota la detección automática. Una posición sigue funcionando en"
+" los documentos que ya la usan y en la compañía dueña."
 
 #. module: account_ux
 #. odoo-python
@@ -1147,8 +1173,8 @@ msgstr ""
 msgid ""
 "«%(company)s» declares the Tax ID %(vat)s, which is already declared higher "
 "up the tree by «%(ancestor)s», but the chain breaks at «%(parent)s». A Tax "
-"ID cannot reappear below a break: «%(company)s» has to declare the same as "
-"«%(parent)s» or something other than %(vat)s."
+"ID cannot reappear below a break: «%(company)s» has to declare the same as «%"
+"(parent)s» or something other than %(vat)s."
 msgstr ""
 
 #~ msgid ""

@@ -20,4 +20,5 @@ from . import test_withholding_suffered_ledger
 from . import test_rentas_cordoba_ws_errors
 from . import test_withholding_certificates_mail
 from . import test_payment_withholding_posted_recompute
+from . import test_withholding_fiscal_position_branches
 from . import test_sky_registry_isolation

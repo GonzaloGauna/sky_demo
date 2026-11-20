@@ -1,0 +1,23 @@
+{
+  "purpose": "Resume installation on the existing neutralized sky_demo_ri without loading new demo data",
+  "native_odoo_policy_checks": 6,
+  "mocked_installer_control_flow_checks": 4,
+  "bash_syntax": "passed",
+  "demo_policy_log_sha256": "2800e73ab475fc4b73331bd5771f64c862b3b7b8cd08a145ee7a2d48422eb0bf",
+  "mock_control_log_sha256": "ba295ae6ce9c08d3f5f95e61902f04b833ddbf5b7e2e0fcfe6fab7c0fb4a8188",
+  "business_record_counts_and_module_states": "unchanged by flag preparation in isolated database; test changes rolled back",
+  "covered": [
+    "existing flags permit dependency demos",
+    "wrong database rejected before writes",
+    "all demo flags disabled",
+    "native loader refuses purchase_stock and fiscal demos",
+    "idempotent preparation",
+    "business records and installation states preserved",
+    "service restart on success",
+    "service restart on install failure",
+    "service restart on preparation failure",
+    "service restart when neutralization fails"
+  ],
+  "scope": "Only deployment scripts and documentation changed; the 16 addon implementations are unchanged.",
+  "server_retry": "Pending manual execution on the user server"
+}

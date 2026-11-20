@@ -7,7 +7,7 @@ assert env.cr.dbname == 'sky_demo_ri', 'Only sky_demo_ri is authorized'
 assert env['ir.config_parameter'].sudo().get_param('database.is_neutralized') == 'true', 'Neutralize the copy first'
 company = env['res.company'].sudo().browse(2).exists()
 assert company and company.chart_template == 'ar_ri', 'Check CLUB company and chart'
-for name in ('cash_control', 'dolar_update', 'partner_debt_info', 'waiki_account_followup',
+for name in ('dolar_update', 'partner_debt_info', 'waiki_account_followup',
              'account_tax_settlement', 'l10n_ar_account_tax_settlement',
              'fix_change_multicompany', 'stock_eliminate_restrictions'):
     assert get_module_path(name), 'Missing addon: ' + name
@@ -16,5 +16,8 @@ legacy = env['ir.module.module'].sudo().search([
     ('state', '=', 'installed'),
 ])
 assert not legacy, 'Legacy modules require a separate data-migration review: ' + ', '.join(legacy.mapped('name'))
+assert not env['ir.module.module'].sudo().with_context(active_test=False).search_count([
+    ('demo', '=', True),
+]), 'Run scripts/waiki19/prepare_no_demo.py first: existing module demo flags can load dependency demo data.'
 print('WAIKI_PREFLIGHT_OK: Odoo 19, sky_demo_ri, company 2, ar_ri. No changes saved.')
 env.cr.rollback()

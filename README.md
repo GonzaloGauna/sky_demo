@@ -15,7 +15,6 @@ La localización argentina preparada en la rama `migration/argentina-19` incluye
 | `account_internal_transfer` | Transferencias internas |
 | `account_background_post` | Confirmación de asientos en segundo plano |
 | `account_view_localization_ar` | Vista de configuración argentina de Waiki |
-| `cash_control` | Cajas, arqueos y movimientos de tesorería |
 | `partner_debt_info` | Cuenta corriente y saldos por empresa |
 | `dolar_update` | Cotizaciones de venta por empresa |
 | `waiki_account_followup` | Cobranzas Community, historial y carta |
@@ -38,9 +37,9 @@ validación adicional. No se incluyen certificados ni claves privadas del contri
 ## Extensión Waiki completa
 
 La misma rama ahora incluye **todos los módulos de waiki-multicompany y
-waikiservicios**: caja, cuenta corriente, cotizaciones, cobranzas Community,
-liquidaciones argentinas y excepciones multicompañía opcionales. Son 16 addons
-en total. `account_followup` se sustituye por `waiki_account_followup`, una
+waikiservicios**: cuenta corriente, cotizaciones, cobranzas Community,
+liquidaciones argentinas y excepciones multicompañía opcionales. Eran 16 addons;
+`cash_control` se retiró en la fase 1 de `loc_ar_rev2` en favor de `account_cashbox` (ADHOC). `account_followup` se sustituye por `waiki_account_followup`, una
 implementación Community independiente.
 
 [Módulos, diferencias funcionales, pruebas e instalación](docs/waiki19/INSTALACION.md).

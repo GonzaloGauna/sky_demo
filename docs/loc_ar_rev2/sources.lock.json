@@ -1,0 +1,205 @@
+[
+  {
+    "module": "account_cashbox",
+    "version": "19.0.1.10.0",
+    "license": "AGPL-3",
+    "repository": "ingadhoc/account-payment",
+    "branch": "19.0",
+    "commit": "0603a5fe7cdb8356560818312a366fb3b59dab61"
+  },
+  {
+    "module": "account_cashbox_l10n_latam_check",
+    "version": "19.0.1.2.0",
+    "license": "AGPL-3",
+    "repository": "ingadhoc/account-payment",
+    "branch": "19.0",
+    "commit": "0603a5fe7cdb8356560818312a366fb3b59dab61"
+  },
+  {
+    "module": "account_payment_pro_receiptbook",
+    "version": "19.0.2.6.0",
+    "license": "AGPL-3",
+    "repository": "ingadhoc/account-payment",
+    "branch": "19.0",
+    "commit": "0603a5fe7cdb8356560818312a366fb3b59dab61"
+  },
+  {
+    "module": "account_payment_ux",
+    "version": "19.0.1.1.0",
+    "license": "AGPL-3",
+    "repository": "ingadhoc/account-payment",
+    "branch": "19.0",
+    "commit": "0603a5fe7cdb8356560818312a366fb3b59dab61"
+  },
+  {
+    "module": "account_journal_security",
+    "version": "19.0.1.1.0",
+    "license": "AGPL-3",
+    "repository": "ingadhoc/account-financial-tools",
+    "branch": "19.0",
+    "commit": "88d964fdd63bc614928b5aa7da1abaa712ac6990"
+  },
+  {
+    "module": "l10n_ar_bank",
+    "version": "19.0.1.1.0",
+    "license": "AGPL-3",
+    "repository": "ingadhoc/odoo-argentina",
+    "branch": "19.0",
+    "commit": "ed607195bb4d6979cff69b58547b5376fbfcb95a"
+  },
+  {
+    "module": "l10n_ar_fiscal_ws_reports",
+    "version": "19.0.1.0.0",
+    "license": "AGPL-3",
+    "repository": "ingadhoc/odoo-argentina-ce",
+    "branch": "19.0",
+    "commit": "61ca14c536fc313435860bf9b759c00011cc02d8"
+  },
+  {
+    "module": "report_xlsx",
+    "version": "19.0.1.0.4",
+    "license": "AGPL-3",
+    "repository": "OCA/reporting-engine",
+    "branch": "19.0",
+    "commit": "ba46b0da7be00f2b86e60df4b8f521a6fcb9235f"
+  },
+  {
+    "module": "report_xlsx_helper",
+    "version": "19.0.1.0.0",
+    "license": "AGPL-3",
+    "repository": "OCA/reporting-engine",
+    "branch": "19.0",
+    "commit": "ba46b0da7be00f2b86e60df4b8f521a6fcb9235f"
+  },
+  {
+    "module": "date_range",
+    "version": "19.0.1.0.3",
+    "license": "LGPL-3",
+    "repository": "OCA/server-ux",
+    "branch": "19.0",
+    "commit": "ecb65d1105b1a58745682b8eb0613b60f0a0abf7"
+  },
+  {
+    "module": "account_financial_report",
+    "version": "19.0.0.0.27",
+    "license": "AGPL-3",
+    "repository": "OCA/account-financial-reporting",
+    "branch": "19.0",
+    "commit": "94ad4583839c7a5e6d5cd0fd5f84f960cf37add8"
+  },
+  {
+    "module": "account_tax_balance",
+    "version": "19.0.1.0.3",
+    "license": "AGPL-3",
+    "repository": "OCA/account-financial-reporting",
+    "branch": "19.0",
+    "commit": "94ad4583839c7a5e6d5cd0fd5f84f960cf37add8"
+  },
+  {
+    "module": "account_statement_base",
+    "version": "19.0.1.0.1",
+    "license": "LGPL-3",
+    "repository": "OCA/account-reconcile",
+    "branch": "19.0",
+    "commit": "fa7be059a06dc87a2df84926b40183a77e409ece"
+  },
+  {
+    "module": "account_reconcile_oca",
+    "version": "19.0.1.1.3",
+    "license": "AGPL-3",
+    "repository": "OCA/account-reconcile",
+    "branch": "19.0",
+    "commit": "fa7be059a06dc87a2df84926b40183a77e409ece"
+  },
+  {
+    "module": "account_statement_import_base",
+    "version": "19.0.1.0.0",
+    "license": "LGPL-3",
+    "repository": "OCA/bank-statement-import",
+    "branch": "19.0",
+    "commit": "058a9a885d775040d89488525f24921389164400"
+  },
+  {
+    "module": "account_statement_import_file",
+    "version": "19.0.1.0.0",
+    "license": "LGPL-3",
+    "repository": "OCA/bank-statement-import",
+    "branch": "19.0",
+    "commit": "058a9a885d775040d89488525f24921389164400"
+  },
+  {
+    "module": "account_statement_import_sheet_file",
+    "version": "19.0.2.0.3",
+    "license": "AGPL-3",
+    "repository": "OCA/bank-statement-import",
+    "branch": "19.0",
+    "commit": "058a9a885d775040d89488525f24921389164400"
+  },
+  {
+    "module": "account_budget_oca",
+    "version": "19.0.1.1.0",
+    "license": "LGPL-3",
+    "repository": "OCA/account-budgeting",
+    "branch": "19.0",
+    "commit": "eb60deecc285a04ae026beba49ed702c6dbb9783"
+  },
+  {
+    "module": "account_invoice_line_report",
+    "version": "19.0.1.0.0",
+    "license": "AGPL-3",
+    "repository": "OCA/account-invoice-reporting",
+    "branch": "19.0",
+    "commit": "79bd733123c25c61bcd8dfb507312d1356ae294f"
+  },
+  {
+    "module": "account_asset_management",
+    "version": "19.0.1.0.5",
+    "license": "AGPL-3",
+    "repository": "OCA/account-financial-tools",
+    "branch": "19.0",
+    "commit": "4a1c88766c18637b682076d22febc69baf36a149"
+  },
+  {
+    "module": "date_range_account",
+    "version": "19.0.1.0.0",
+    "license": "AGPL-3",
+    "repository": "OCA/server-ux",
+    "branch": "19.0",
+    "commit": "ecb65d1105b1a58745682b8eb0613b60f0a0abf7"
+  },
+  {
+    "module": "account_statement_import_file_reconcile_oca",
+    "version": "19.0.1.0.0",
+    "license": "AGPL-3",
+    "repository": "OCA/bank-statement-import",
+    "branch": "19.0",
+    "commit": "058a9a885d775040d89488525f24921389164400"
+  },
+  {
+    "module": "account_payment_pro",
+    "version": "19.0.3.4.0",
+    "license": "AGPL-3",
+    "repository": "ingadhoc/account-payment",
+    "branch": "19.0",
+    "commit": "0603a5fe7cdb8356560818312a366fb3b59dab61",
+    "local_changes": "docs/loc_ar_rev2/local_changes.patch: _compute_available_journal_ids por empresa (de argentina19), test con AccountTestInvoicingCommon, pre-migración 19.0.3.4.0 de la vista latam_check"
+  },
+  {
+    "module": "account_ux",
+    "version": "19.0.1.33.0",
+    "license": "AGPL-3",
+    "repository": "ingadhoc/account-financial-tools",
+    "branch": "19.0",
+    "commit": "88d964fdd63bc614928b5aa7da1abaa712ac6990",
+    "local_changes": "docs/loc_ar_rev2/local_changes.patch: herencia en lugar de parches globales (de argentina19), sin hooks.py, test de aislamiento"
+  },
+  {
+    "module": "l10n_ar_tax",
+    "version": "19.0.1.39.0",
+    "license": "AGPL-3",
+    "repository": "ingadhoc/odoo-argentina",
+    "branch": "19.0",
+    "commit": "ed607195bb4d6979cff69b58547b5376fbfcb95a",
+    "local_changes": "docs/loc_ar_rev2/local_changes.patch: _synchronize_to_moves por herencia, posición fiscal manual al crear el pago agrupado (de argentina19), test de aislamiento"
+  }
+]

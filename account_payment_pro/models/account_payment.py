@@ -71,7 +71,6 @@ class AccountPayment(models.Model):
         digits=0,
         min_display_digits=2,
     )
-    reconcile_on_company_currency = fields.Boolean(related="company_id.reconcile_on_company_currency")
     counterpart_currency_editable = fields.Boolean(
         compute="_compute_counterpart_currency_editable",
         help="True when the destination account does not force a specific currency, "
@@ -272,7 +271,6 @@ class AccountPayment(models.Model):
         "destination_account_id",
         "company_currency_id",
         "company_id",
-        "journal_id",
         "to_pay_move_line_ids",
         "multi_currency_debt",
     )
@@ -283,14 +281,7 @@ class AccountPayment(models.Model):
             if account_currency and account_currency != rec.company_currency_id:
                 rec.counterpart_currency_editable = False
                 continue
-            elif rec.company_id.reconcile_on_company_currency:
-                # with reconcile the debt can only be in C or in the journal currency (see _compute_counterpart_currency_id)
-                journal_currency = rec.journal_id.currency_id
-                rec.counterpart_currency_editable = (
-                    bool(journal_currency) and journal_currency != rec.company_currency_id
-                )
-                continue
-            elif self.env.context.get("default_company_id"):
+            elif self.env.context.get("default_company_id") and not rec.company_id.reconcile_on_company_currency:
                 # sin reconcile, si venimos desde una factura NO queremos que editen la currency
                 rec.counterpart_currency_editable = False
                 continue
@@ -301,7 +292,6 @@ class AccountPayment(models.Model):
         "to_pay_move_line_ids",
         "company_id",
         "company_currency_id",
-        "journal_id",
         "is_internal_transfer",
         "destination_journal_id",
     )
@@ -321,11 +311,11 @@ class AccountPayment(models.Model):
                 rec.counterpart_currency_id = account_currency
                 continue
 
-            # Case 2: the account has no currency (or it is C). With reconcile the debt is in C or in the journal
-            # currency: another one is converted and rounded, leaving a residual in C with no exchange difference.
-            # Without reconcile it is recomputed because the user may pick debt in another currency
+            # Caso 2: la cuenta no tiene moneda definida (o es la de la compañía), en reconcile si ya eligió una
+            # la mantenemos. Sin reconcile se recomputa porque pudo elegir deuda en otra moneda
             if rec.company_id.reconcile_on_company_currency:
-                if rec.counterpart_currency_id not in (company_currency | rec.journal_id.currency_id):
+                if not rec.counterpart_currency_id:
+                    # Default: moneda de la compañía
                     rec.counterpart_currency_id = company_currency
             elif rec.to_pay_move_line_ids:
                 currencies = rec.to_pay_move_line_ids.mapped("currency_id")
@@ -1282,6 +1272,27 @@ class AccountPayment(models.Model):
                     % (rec.partner_id.name, to_pay_partners.name)
                 )
 
+    def _get_debt_lines_covered(self, counterpart_aml, debt_aml):
+        """Return the debt lines that the core reconciliation would actually match."""
+        amls = (counterpart_aml + debt_aml).with_context(
+            no_exchange_difference=self.env.context.get("no_exchange_difference")
+            or bool(self.env["ir.config_parameter"].sudo().get_param("account.disable_partial_exchange_diff"))
+        )
+        plan_list, all_amls = amls._optimize_reconciliation_plan([amls])
+        values_map = {
+            aml: {
+                "aml": aml,
+                "amount_residual": aml.amount_residual,
+                "amount_residual_currency": aml.amount_residual_currency,
+            }
+            for aml in all_amls
+        }
+        matched_ids = set()
+        for plan in plan_list:
+            for res in amls._prepare_reconciliation_plan(plan, values_map):
+                matched_ids.update((res["partial_values"]["debit_move_id"], res["partial_values"]["credit_move_id"]))
+        return debt_aml.filtered(lambda l: l.id in matched_ids)
+
     def _reconcile_after_post(self):
         to_reconcile = self.filtered(lambda x: x.company_id.use_payment_pro and not x.is_internal_transfer)
         # El pago con tarjeta de crédito llega a 'paid' con el asiento en borrador (el core no lo
@@ -1299,6 +1310,7 @@ class AccountPayment(models.Model):
                 lambda r: not r.reconciled and r.account_id.id == counterpart_aml.account_id.id
             )
             if counterpart_aml and debt_aml:
+                debt_aml = self._get_debt_lines_covered(counterpart_aml, debt_aml)
                 (counterpart_aml + (debt_aml)).reconcile()
 
     def action_post(self):
