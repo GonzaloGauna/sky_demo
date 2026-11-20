@@ -158,5 +158,21 @@
     "repository": "OCA/account-financial-tools",
     "branch": "19.0",
     "commit": "4a1c88766c18637b682076d22febc69baf36a149"
+  },
+  {
+    "module": "date_range_account",
+    "version": "19.0.1.0.0",
+    "license": "AGPL-3",
+    "repository": "OCA/server-ux",
+    "branch": "19.0",
+    "commit": "ecb65d1105b1a58745682b8eb0613b60f0a0abf7"
+  },
+  {
+    "module": "account_statement_import_file_reconcile_oca",
+    "version": "19.0.1.0.0",
+    "license": "AGPL-3",
+    "repository": "OCA/bank-statement-import",
+    "branch": "19.0",
+    "commit": "058a9a885d775040d89488525f24921389164400"
   }
 ]

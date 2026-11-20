@@ -62,6 +62,6 @@ echo 'Installing missing modules and updating installed modules in sky_demo_ri.'
 run_odoo -c "$conf" -d "$database" -i "$modules" -u "$modules" \
     --without-demo --stop-after-init --no-http --max-cron-threads=0
 
-echo 'Verifying all 16 modules and the homologation configuration.'
+echo 'Verifying all listed modules and the homologation configuration.'
 run_odoo shell -c "$conf" -d "$database" --no-http --max-cron-threads=0 \
     < "$repo/scripts/waiki19/verify_install.py"

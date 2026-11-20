@@ -8,7 +8,7 @@ assert parameters.get_param('database.is_neutralized') == 'true'
 company = env['res.company'].sudo().browse(2).exists()
 assert company and company.chart_template == 'ar_ri'
 assert company.l10n_ar_afip_responsibility_type_id.code == '1'
-module_path = get_module_path('cash_control')
+module_path = get_module_path('dolar_update')
 from pathlib import Path
 with (Path(module_path).parent / 'docs/waiki19/waiki19_all_modules.json').open() as file:
     names = json.load(file)

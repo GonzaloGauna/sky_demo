@@ -7,7 +7,7 @@ assert env.cr.dbname == 'sky_demo_ri', 'Only sky_demo_ri is authorized'
 assert env['ir.config_parameter'].sudo().get_param('database.is_neutralized') == 'true', 'Neutralize the copy first'
 company = env['res.company'].sudo().browse(2).exists()
 assert company and company.chart_template == 'ar_ri', 'Check CLUB company and chart'
-for name in ('cash_control', 'dolar_update', 'partner_debt_info', 'waiki_account_followup',
+for name in ('dolar_update', 'partner_debt_info', 'waiki_account_followup',
              'account_tax_settlement', 'l10n_ar_account_tax_settlement',
              'fix_change_multicompany', 'stock_eliminate_restrictions'):
     assert get_module_path(name), 'Missing addon: ' + name
