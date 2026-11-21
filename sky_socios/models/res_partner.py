@@ -9,6 +9,7 @@ from odoo.tools import email_normalize
 
 
 SOCIO_CODE_RE = re.compile(r"^[A-Za-z0-9._/-]+$")
+SOCIO_NAME_FIELDS = {"tipo_registro", "apellido", "nombre", "name"}
 
 
 class ResPartner(models.Model):
@@ -177,9 +178,16 @@ class ResPartner(models.Model):
         return partners
 
     def write(self, vals):
-        vals = self._sync_socio_name(vals)
         old_families = self.mapped("familia_id")
-        result = super().write(vals)
+        if SOCIO_NAME_FIELDS.intersection(vals) and len(self) > 1:
+            # El nombre de un socio depende de los datos de cada registro: escribir uno a uno.
+            result = True
+            for partner in self:
+                result = super(ResPartner, partner).write(partner._sync_socio_name(vals)) and result
+        elif SOCIO_NAME_FIELDS.intersection(vals):
+            result = super().write(self._sync_socio_name(vals))
+        else:
+            result = super().write(vals)
         constraint_fields = {"tipo_registro", "codigo", "email_aux", "grupo_familiar", "familia_id"}
         if constraint_fields.intersection(vals):
             self._check_partner_constraints()
